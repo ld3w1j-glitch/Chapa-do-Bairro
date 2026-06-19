@@ -219,7 +219,7 @@ nav a:hover {
     height: 190px;
     border-radius: 14px;
     object-fit: cover;
-    background: rgba(255,255,255,.08);
+    background: rgba(15,15,15,.95);
     margin-bottom: 14px;
 }
 
@@ -526,7 +526,7 @@ th {
     height: 130px;
     object-fit: cover;
     border-radius: 14px;
-    background: rgba(255,255,255,.08);
+    background: rgba(15,15,15,.95);
 }
 
 .placeholder.small {
@@ -666,7 +666,7 @@ th {
         gap: 0;
         padding: 12px;
         background: rgba(0,0,0,.80);
-        border: 1px solid rgba(255,255,255,.12);
+        border: 1px solid rgba(217,106,27,.35);
         border-radius: 18px;
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
@@ -1050,7 +1050,7 @@ main {
 .profit-bar-track {
     position: relative;
     height: 18px;
-    background: rgba(255,255,255,.08);
+    background: rgba(15,15,15,.95);
     border-radius: 999px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,.10);
@@ -2087,7 +2087,7 @@ main {
 }
 
 .kitchen-ticket {
-    background: rgba(255,255,255,.08);
+    background: rgba(15,15,15,.95);
     border: 1px solid rgba(255,255,255,.12);
     border-left: 5px solid var(--orange);
     border-radius: 16px;
@@ -2127,10 +2127,11 @@ main {
 }
 
 .ticket-total {
-    display: block;
+    display:block;
     color: var(--orange);
-    margin: 12px 0;
-    font-size: 20px;
+    margin:12px 0;
+    font-size:32px;
+    font-weight:800;
 }
 
 .ticket-actions a {
