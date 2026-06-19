@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Fechamento de Caixa | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container finance-page">
+    <div class="admin-head">
+        <div>
+            <h1>💰 Fechamento de Caixa</h1>
+            <p class="muted">Resumo diário por forma de pagamento, cancelamentos e taxa de entrega.</p>
+        </div>
+        <div class="quick-actions">
+            <button class="btn" onclick="window.print()">Imprimir</button>
+            <a class="btn secondary" href="/admin/relatorios">Voltar</a>
+        </div>
+    </div>
+
+    <form method="get" class="panel inline-form no-print">
+        <label>Data do fechamento</label>
+        <input type="date" name="date" value="{{ selected_date.isoformat() }}">
+        <button class="btn" type="submit">Filtrar</button>
+    </form>
+
+    <div class="stats">
+        <div class="stat"><strong>R$ {{ "%.2f"|format(gross_total) }}</strong><span>Total vendido</span></div>
+        <div class="stat"><strong>{{ orders_count }}</strong><span>Pedidos válidos</span></div>
+        <div class="stat"><strong>R$ {{ "%.2f"|format(avg_ticket) }}</strong><span>Ticket médio</span></div>
+        <div class="stat"><strong>R$ {{ "%.2f"|format(delivery_total) }}</strong><span>Taxas de entrega</span></div>
+        <div class="stat danger-stat"><strong>{{ canceled_count }}</strong><span>Cancelados</span></div>
+        <div class="stat danger-stat"><strong>R$ {{ "%.2f"|format(canceled_total) }}</strong><span>Total cancelado</span></div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="panel">
+            <h2>Resumo por pagamento</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Forma</th><th>Pedidos</th><th>Total</th></tr></thead>
+                    <tbody>
+                        {% for payment, row in payment_rows.items() %}
+                        <tr><td>{{ payment }}</td><td>{{ row.count }}</td><td>R$ {{ "%.2f"|format(row.total) }}</td></tr>
+                        {% else %}
+                        <tr><td colspan="3">Nenhum pedido válido nessa data.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="panel operator-panel">
+            <h2>Conferência</h2>
+            <p>✅ Some o dinheiro físico com o total em dinheiro.</p>
+            <p>✅ Confira comprovantes PIX e cartão.</p>
+            <p>✅ Verifique pedidos cancelados antes de fechar.</p>
+            <p>✅ Imprima ou salve esta tela como PDF no fim do expediente.</p>
+        </div>
+    </div>
+
+    <h2>Pedidos do dia</h2>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>#</th><th>Horário</th><th>Cliente</th><th>Status</th><th>Pagamento</th><th>Total</th></tr></thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr class="{{ 'row-canceled' if pedido.status == 'cancelado' else '' }}">
+                    <td>#{{ pedido.id }}</td>
+                    <td>{{ pedido.created_at.strftime('%H:%M') }}</td>
+                    <td>{{ pedido.customer_name }}</td>
+                    <td><span class="badge status-{{ pedido.status|replace(' ', '-') }}">{{ pedido.status_label() }}</span></td>
+                    <td>{{ pedido.payment_method or '-' }}</td>
+                    <td>{{ pedido.total_br() }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6">Nenhum pedido nessa data.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -4,7 +4,7 @@ import csv
 import io
 import json
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, Response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, Response, session
 from app.core.security import login_required
 from app.extensions import db
 from sqlalchemy import func
@@ -15,11 +15,24 @@ from app.models.ingredient import Ingredient
 from app.models.coupon import Coupon
 from app.models.customer import Customer
 from app.models.delivery_zone import DeliveryZone
+from app.models.user import User
+from app.models.audit_log import AuditLog
 from app.services.upload_service import save_upload
 
 admin_bp = Blueprint("admin", __name__)
 
 ALLOWED_ORDER_STATUSES = ["recebido", "em preparo", "saiu para entrega", "finalizado", "cancelado"]
+
+def _admin_name():
+    return session.get("admin_user") or "admin"
+
+def _audit(action, entity=None, entity_id=None, details=None, commit=False):
+    log = AuditLog(username=_admin_name(), action=action, entity=entity, entity_id=str(entity_id) if entity_id is not None else None, details=details)
+    db.session.add(log)
+    if commit:
+        db.session.commit()
+    return log
+
 
 @admin_bp.route("/")
 @login_required
@@ -42,6 +55,8 @@ def dashboard():
     low_stock = Ingredient.query.filter(Ingredient.current_stock <= Ingredient.minimum_stock, Ingredient.active == True).count()
     total_customers = Customer.query.count()
     vip_customers = Customer.query.filter(Customer.total_orders >= 10).count()
+    blocked_customers = Customer.query.filter_by(blocked=True).count()
+    audit_today = AuditLog.query.filter(AuditLog.created_at >= start).count()
 
     best_sellers = (
         db.session.query(Product.name, func.coalesce(func.sum(OrderItem.quantity), 0).label("qty"))
@@ -98,7 +113,9 @@ def dashboard():
         peak_hour=peak_hour,
         cancel_rate=cancel_rate,
         total_customers=total_customers,
-        vip_customers=vip_customers
+        vip_customers=vip_customers,
+        blocked_customers=blocked_customers,
+        audit_today=audit_today
     )
 
 
@@ -114,7 +131,35 @@ def _load_site_settings():
         "open_message": "Estamos abertos para pedidos!",
         "pix_key": "",
         "pix_owner": "Chapa do Bairro",
-        "pix_city": "MONTES CLAROS"
+        "pix_city": "MONTES CLAROS",
+        "store_address": "",
+        "instagram": "",
+        "opening_hours": "Terça a domingo, 18h às 23h",
+        "closed_message": "Estamos fechados no momento. Volte no nosso horário de atendimento!",
+        "minimum_order": "0",
+        "service_fee": "0",
+        "allow_pickup": "on",
+        "allow_coupon": "on",
+        "require_notes": "",
+        "allow_out_of_stock": "",
+        "hero_title": "CHAPA QUENTE, HAMBÚRGUER DE VERDADE.",
+        "hero_badge": "🔥 Mais pedido do bairro",
+        "hero_video_enabled": "on",
+        "dark_mode": "on",
+        "kitchen_sound": "on",
+        "kitchen_autorefresh": "15",
+        "kitchen_fullscreen": "",
+        "auto_print_ticket": "",
+        "floating_ticket_enabled": "on",
+        "floating_ticket_style": "horizontal",
+        "floating_ticket_coupon": "CHAPA10",
+        "floating_ticket_reward_product_id": "",
+        "floating_ticket_text": "Ganhe desconto especial no seu primeiro pedido!",
+        "whatsapp_received": "Olá! Recebemos seu pedido na Chapa do Bairro. Em breve ele entra em preparo. 🍔🔥",
+        "whatsapp_preparing": "Seu pedido já está em preparo na chapa. 🔥",
+        "whatsapp_delivery": "Seu pedido saiu para entrega. 🛵",
+        "whatsapp_pickup_ready": "Seu pedido está pronto para retirada. 🍔",
+        "whatsapp_done": "Pedido entregue! Obrigado por comprar com a Chapa do Bairro. ⭐"
     }
     try:
         with open(_settings_path(), "r", encoding="utf-8") as f:
@@ -182,11 +227,42 @@ def settings():
             "pix_key": request.form.get("pix_key", settings.get("pix_key", "")).strip(),
             "pix_owner": request.form.get("pix_owner", settings.get("pix_owner", "Chapa do Bairro")).strip(),
             "pix_city": request.form.get("pix_city", settings.get("pix_city", "MONTES CLAROS")).strip() or "MONTES CLAROS",
+            "store_address": request.form.get("store_address", settings.get("store_address", "")).strip(),
+            "instagram": request.form.get("instagram", settings.get("instagram", "")).strip(),
+            "opening_hours": request.form.get("opening_hours", settings.get("opening_hours", "")).strip(),
+            "closed_message": request.form.get("closed_message", settings.get("closed_message", "")).strip(),
+            "minimum_order": request.form.get("minimum_order", settings.get("minimum_order", "0")).strip() or "0",
+            "service_fee": request.form.get("service_fee", settings.get("service_fee", "0")).strip() or "0",
+            "allow_pickup": "on" if request.form.get("allow_pickup") == "on" else "",
+            "allow_coupon": "on" if request.form.get("allow_coupon") == "on" else "",
+            "require_notes": "on" if request.form.get("require_notes") == "on" else "",
+            "allow_out_of_stock": "on" if request.form.get("allow_out_of_stock") == "on" else "",
+            "hero_title": request.form.get("hero_title", settings.get("hero_title", "")).strip(),
+            "hero_badge": request.form.get("hero_badge", settings.get("hero_badge", "")).strip(),
+            "hero_video_enabled": "on" if request.form.get("hero_video_enabled") == "on" else "",
+            "dark_mode": "on" if request.form.get("dark_mode") == "on" else "",
+            "kitchen_sound": "on" if request.form.get("kitchen_sound") == "on" else "",
+            "kitchen_autorefresh": request.form.get("kitchen_autorefresh", settings.get("kitchen_autorefresh", "15")).strip() or "15",
+            "kitchen_fullscreen": "on" if request.form.get("kitchen_fullscreen") == "on" else "",
+            "auto_print_ticket": "on" if request.form.get("auto_print_ticket") == "on" else "",
+            "floating_ticket_enabled": "on" if request.form.get("floating_ticket_enabled") == "on" else "",
+            "floating_ticket_style": request.form.get("floating_ticket_style", settings.get("floating_ticket_style", "horizontal")).strip() or "horizontal",
+            "floating_ticket_coupon": request.form.get("floating_ticket_coupon", settings.get("floating_ticket_coupon", "CHAPA10")).strip().upper() or "CHAPA10",
+            "floating_ticket_reward_product_id": request.form.get("floating_ticket_reward_product_id", settings.get("floating_ticket_reward_product_id", "")).strip(),
+            "floating_ticket_text": request.form.get("floating_ticket_text", settings.get("floating_ticket_text", "")).strip(),
+            "whatsapp_received": request.form.get("whatsapp_received", settings.get("whatsapp_received", "")).strip(),
+            "whatsapp_preparing": request.form.get("whatsapp_preparing", settings.get("whatsapp_preparing", "")).strip(),
+            "whatsapp_delivery": request.form.get("whatsapp_delivery", settings.get("whatsapp_delivery", "")).strip(),
+            "whatsapp_pickup_ready": request.form.get("whatsapp_pickup_ready", settings.get("whatsapp_pickup_ready", "")).strip(),
+            "whatsapp_done": request.form.get("whatsapp_done", settings.get("whatsapp_done", "")).strip(),
         })
         _save_site_settings(settings)
-        flash("Configurações visuais atualizadas.", "success")
+        _audit("Atualizou configurações", "configuracoes", None, "Painel de configurações")
+        db.session.commit()
+        flash("Configurações atualizadas com sucesso.", "success")
         return redirect(url_for("admin.settings"))
-    return render_template("admin/settings.html", settings=settings)
+    produtos = Product.query.filter_by(active=True).order_by(Product.name).all()
+    return render_template("admin/settings.html", settings=settings, produtos=produtos)
 
 @admin_bp.route("/campanhas")
 @login_required
@@ -221,6 +297,8 @@ def coupons():
         coupon.active = request.form.get("active") == "on"
         db.session.add(coupon)
         db.session.commit()
+        _audit("Salvou cupom", "cupom", coupon.id, coupon.code)
+        db.session.commit()
         flash("Cupom salvo com sucesso.", "success")
         return redirect(url_for("admin.coupons"))
     cupons = Coupon.query.order_by(Coupon.active.desc(), Coupon.code).all()
@@ -238,8 +316,54 @@ def toggle_coupon(coupon_id):
 @admin_bp.route("/clientes")
 @login_required
 def customers():
-    clientes = Customer.query.order_by(Customer.total_spent.desc()).all()
+    clientes = Customer.query.order_by(Customer.blocked.asc(), Customer.total_spent.desc()).all()
     return render_template("admin/customers.html", clientes=clientes)
+
+@admin_bp.route("/clientes/<int:customer_id>/editar", methods=["POST"])
+@login_required
+def update_customer(customer_id):
+    cliente = Customer.query.get_or_404(customer_id)
+    cliente.tags = request.form.get("tags", "").strip()
+    cliente.notes = request.form.get("notes", "").strip()
+    db.session.commit()
+    _audit("Atualizou cliente", "cliente", cliente.id, f"Tags: {cliente.tags}", commit=True)
+    flash("Cliente atualizado.", "success")
+    return redirect(url_for("admin.customers"))
+
+@admin_bp.route("/clientes/<int:customer_id>/bloquear", methods=["POST"])
+@login_required
+def toggle_customer_block(customer_id):
+    cliente = Customer.query.get_or_404(customer_id)
+    cliente.blocked = not cliente.blocked
+    action = "Bloqueou cliente" if cliente.blocked else "Desbloqueou cliente"
+    _audit(action, "cliente", cliente.id, f"{cliente.name} / {cliente.phone}")
+    db.session.commit()
+    flash("Status do cliente atualizado.", "success")
+    return redirect(url_for("admin.customers"))
+
+@admin_bp.route("/clientes/<int:customer_id>/excluir", methods=["POST"])
+@login_required
+def delete_customer(customer_id):
+    admin_password = request.form.get("admin_password", "")
+    admin_username = session.get("admin_user")
+
+    admin_user = None
+    if admin_username:
+        admin_user = User.query.filter_by(username=admin_username, active=True).first()
+    if not admin_user:
+        admin_user = User.query.filter_by(role="admin", active=True).first()
+
+    if not admin_user or not admin_user.check_password(admin_password):
+        flash("Senha do admin incorreta. Cliente não foi excluído.", "error")
+        return redirect(url_for("admin.customers"))
+
+    cliente = Customer.query.get_or_404(customer_id)
+    nome = cliente.name or cliente.phone or f"Cliente #{cliente.id}"
+    _audit("Excluiu cliente", "cliente", cliente.id, f"{nome} / {cliente.phone}")
+    db.session.delete(cliente)
+    db.session.commit()
+    flash(f"Cliente {nome} excluído com sucesso.", "success")
+    return redirect(url_for("admin.customers"))
 
 @admin_bp.route("/relatorios/exportar")
 @login_required
@@ -251,6 +375,27 @@ def export_reports_csv():
     for p in pedidos:
         writer.writerow([p.id, p.customer_name, p.customer_phone, p.status, p.payment_method or "", p.delivery_type, f"{p.total:.2f}", p.created_at.strftime("%d/%m/%Y %H:%M")])
     return Response(output.getvalue(), mimetype="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=relatorio_chapa_do_bairro.csv"})
+
+
+@admin_bp.route("/auditoria")
+@login_required
+def audit_logs():
+    logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(200).all()
+    return render_template("admin/audit_logs.html", logs=logs)
+
+@admin_bp.route("/backup/completo")
+@login_required
+def backup_full():
+    data = {
+        "exportado_em": datetime.utcnow().isoformat(),
+        "produtos": [{"id": p.id, "nome": p.name, "preco": p.price, "ativo": p.active} for p in Product.query.order_by(Product.id).all()],
+        "clientes": [{"id": c.id, "nome": c.name, "telefone": c.phone, "pedidos": c.total_orders, "gasto": c.total_spent, "pontos": c.loyalty_points, "bloqueado": c.blocked, "tags": c.tags} for c in Customer.query.order_by(Customer.id).all()],
+        "pedidos": [{"id": o.id, "cliente": o.customer_name, "telefone": o.customer_phone, "status": o.status, "total": o.total, "data": o.created_at.isoformat() if o.created_at else None} for o in Order.query.order_by(Order.id).all()],
+        "insumos": [{"id": i.id, "nome": i.name, "estoque": i.current_stock, "minimo": i.minimum_stock, "unidade": i.unit, "custo": i.cost_per_unit} for i in Ingredient.query.order_by(Ingredient.id).all()],
+        "cupons": [{"codigo": c.code, "ativo": c.active, "valor": c.value, "tipo": c.discount_type} for c in Coupon.query.order_by(Coupon.id).all()],
+    }
+    _audit("Exportou backup completo", "backup", None, "JSON completo", commit=True)
+    return Response(json.dumps(data, ensure_ascii=False, indent=2), mimetype="application/json; charset=utf-8", headers={"Content-Disposition": "attachment; filename=backup_chapa_do_bairro.json"})
 
 @admin_bp.route("/categorias")
 @login_required
@@ -309,6 +454,8 @@ def create_product():
             )
             db.session.add(product)
             db.session.commit()
+            _audit("Criou produto", "produto", product.id, product.name)
+            db.session.commit()
             flash("Produto criado com sucesso.", "success")
             return redirect(url_for("admin.products"))
         except Exception as e:
@@ -337,6 +484,8 @@ def edit_product(product_id):
                 produto.image = image
 
             db.session.commit()
+            _audit("Atualizou produto", "produto", produto.id, produto.name)
+            db.session.commit()
             flash("Produto atualizado com sucesso.", "success")
             return redirect(url_for("admin.products"))
         except Exception as e:
@@ -348,6 +497,7 @@ def edit_product(product_id):
 @login_required
 def delete_product(product_id):
     produto = Product.query.get_or_404(product_id)
+    _audit("Excluiu produto", "produto", produto.id, produto.name)
     db.session.delete(produto)
     db.session.commit()
     flash("Produto excluído.", "success")
@@ -364,6 +514,68 @@ def orders():
 def order_history():
     pedidos = Order.query.filter_by(status="finalizado").order_by(Order.created_at.desc()).all()
     return render_template("admin/orders.html", pedidos=pedidos, title="Histórico de pedidos finalizados")
+
+@admin_bp.route("/financeiro/caixa")
+@login_required
+def cash_closing():
+    """Fechamento de caixa do dia com separação por forma de pagamento."""
+    date_str = request.args.get("date")
+    try:
+        selected_date = datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else datetime.utcnow().date()
+    except ValueError:
+        selected_date = datetime.utcnow().date()
+
+    start = datetime.combine(selected_date, datetime.min.time())
+    end = start + timedelta(days=1)
+
+    pedidos = Order.query.filter(Order.created_at >= start, Order.created_at < end).order_by(Order.created_at.asc()).all()
+    valid_orders = [o for o in pedidos if o.status != "cancelado"]
+    canceled_orders = [o for o in pedidos if o.status == "cancelado"]
+
+    payment_rows = {}
+    for order in valid_orders:
+        key = (order.payment_method or "Não informado").strip() or "Não informado"
+        payment_rows.setdefault(key, {"count": 0, "total": 0})
+        payment_rows[key]["count"] += 1
+        payment_rows[key]["total"] += order.total or 0
+
+    delivery_total = sum(o.delivery_fee or 0 for o in valid_orders)
+    gross_total = sum(o.total or 0 for o in valid_orders)
+    orders_count = len(valid_orders)
+    avg_ticket = (gross_total / orders_count) if orders_count else 0
+
+    return render_template(
+        "admin/cash_closing.html",
+        selected_date=selected_date,
+        pedidos=pedidos,
+        payment_rows=payment_rows,
+        delivery_total=delivery_total,
+        gross_total=gross_total,
+        orders_count=orders_count,
+        avg_ticket=avg_ticket,
+        canceled_count=len(canceled_orders),
+        canceled_total=sum(o.total or 0 for o in canceled_orders),
+    )
+
+@admin_bp.route("/relatorios/lucro-produtos")
+@login_required
+def product_profit_report():
+    """Relatório de custo, margem e lucro estimado por produto."""
+    produtos = Product.query.order_by(Product.name).all()
+    rows = []
+    for produto in produtos:
+        cost = produto.production_cost()
+        profit = produto.estimated_profit()
+        margin = (profit / produto.price * 100) if produto.price else 0
+        rows.append({
+            "produto": produto,
+            "cost": cost,
+            "profit": profit,
+            "margin": margin,
+            "possible": produto.max_possible_production(),
+        })
+    rows.sort(key=lambda r: r["profit"], reverse=True)
+    return render_template("admin/product_profit_report.html", rows=rows)
 
 @admin_bp.route("/relatorios")
 @login_required
@@ -482,12 +694,15 @@ def update_order_status(order_id):
 
     if novo_status == "cancelado":
         _restore_stock_for_order(pedido)
+        _audit("Cancelou pedido", "pedido", pedido.id, f"Pedido cancelado e estoque devolvido")
         db.session.delete(pedido)
         db.session.commit()
         flash("Pedido cancelado, excluído e estoque devolvido.", "success")
         return redirect(url_for("admin.orders"))
 
+    antigo_status = pedido.status
     pedido.status = novo_status
+    _audit("Alterou status do pedido", "pedido", pedido.id, f"{antigo_status} -> {novo_status}")
     db.session.commit()
     flash("Status do pedido atualizado.", "success")
     return redirect(url_for("admin.order_detail", order_id=pedido.id))

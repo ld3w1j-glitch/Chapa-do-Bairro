@@ -2242,3 +2242,422 @@ main {
     .container{max-width:100%!important;padding:0!important;}
     .kitchen-ticket{box-shadow:none!important;border-radius:0!important;margin:0!important;max-width:80mm!important;padding:8mm!important;}
 }
+
+/* Configurações premium v9 */
+.settings-page { display: grid; gap: 22px; }
+.settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.settings-section {
+    background: linear-gradient(145deg, rgba(15,15,15,.96), rgba(29,18,12,.92));
+    border: 1px solid rgba(217,106,27,.28);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.28), 0 0 22px rgba(217,106,27,.08);
+}
+.settings-section h2 { margin: 0 0 16px; color: var(--orange2); font-size: 1.15rem; }
+.settings-section label { display: grid; gap: 7px; margin-bottom: 13px; font-weight: 800; color: #f6d6bc; }
+.settings-section input,
+.settings-section textarea {
+    width: 100%; border: 1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.34);
+    color: var(--text); border-radius: 13px; padding: 12px 13px; font: inherit; outline: none;
+}
+.settings-section input:focus,
+.settings-section textarea:focus { border-color: rgba(217,106,27,.65); box-shadow: 0 0 0 3px rgba(217,106,27,.14); }
+.settings-section input[type="color"] { min-height: 52px; padding: 5px; cursor: pointer; }
+.check-list { display: grid; gap: 10px; margin: 12px 0 16px; }
+.check-list label { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--text); font-weight: 700; }
+.check-list input { width: 18px; height: 18px; accent-color: var(--orange); }
+.settings-actions { position: sticky; bottom: 12px; z-index: 5; display: flex; gap: 12px; justify-content: flex-end; padding: 14px; border: 1px solid rgba(217,106,27,.26); border-radius: 18px; background: rgba(8,8,8,.86); backdrop-filter: blur(10px); }
+.btn.small { padding: 10px 14px; font-size: .92rem; justify-self: start; }
+@media (max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } .settings-actions { position: static; flex-direction: column; } }
+
+
+/* V10 - Exclusão segura de clientes */
+.btn.danger {
+    background: rgba(255, 77, 77, .14);
+    color: #ffb3b3;
+    border: 1px solid rgba(255, 77, 77, .42);
+}
+
+.btn.danger:hover {
+    box-shadow: 0 0 22px rgba(255, 77, 77, .24);
+}
+
+.btn.small,
+.delete-customer-box summary.btn.small {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-radius: 10px;
+}
+
+.delete-customer-box {
+    position: relative;
+}
+
+.delete-customer-box summary {
+    list-style: none;
+}
+
+.delete-customer-box summary::-webkit-details-marker {
+    display: none;
+}
+
+.delete-customer-box[open] form {
+    position: absolute;
+    right: 0;
+    top: 42px;
+    width: 260px;
+    padding: 14px;
+    background: rgba(12, 12, 12, .98);
+    border: 1px solid rgba(255, 77, 77, .38);
+    border-radius: 14px;
+    box-shadow: 0 18px 45px rgba(0,0,0,.45);
+    z-index: 20;
+}
+
+.delete-customer-box label {
+    display: block;
+    margin-bottom: 6px;
+    color: #ffdddd;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.delete-customer-box input {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.muted.small {
+    font-size: 13px;
+    opacity: .78;
+}
+
+/* v11 - melhorias operacionais */
+.inline-settings-form {
+    display: grid;
+    gap: 8px;
+    min-width: 220px;
+}
+.inline-settings-form input {
+    width: 100%;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(217,106,27,.25);
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 10px;
+}
+.badge.danger,
+.badge.status-bloqueado {
+    background: rgba(220, 38, 38, .18);
+    border: 1px solid rgba(220, 38, 38, .45);
+    color: #fecaca;
+}
+.badge.success {
+    background: rgba(34, 197, 94, .14);
+    border: 1px solid rgba(34, 197, 94, .35);
+    color: #bbf7d0;
+}
+.table-wrap td details.delete-customer-box {
+    min-width: 180px;
+}
+
+/* v12 - financeiro, lucro e compras */
+.finance-page .panel.inline-form {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.finance-page .panel.inline-form label {
+    color: #f6d6bc;
+    font-weight: 800;
+}
+.finance-page .panel.inline-form input[type="date"] {
+    background: rgba(0,0,0,.35);
+    color: #fff;
+    border: 1px solid rgba(217,106,27,.35);
+    border-radius: 12px;
+    padding: 11px 12px;
+}
+.danger-stat strong { color: #ff9a9a; }
+.row-canceled { opacity: .62; text-decoration: line-through; }
+.profit-positive { color: #bbf7d0; font-weight: 900; }
+@media print {
+    .topbar, .whatsapp-float, .no-print, .quick-actions, .flash-wrap { display: none !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .container, .panel, .table-wrap, .stat { box-shadow: none !important; border-color: #ccc !important; background: #fff !important; color: #000 !important; }
+    table, th, td { color: #000 !important; border-color: #999 !important; }
+    .badge { color: #000 !important; border: 1px solid #777 !important; background: #eee !important; }
+}
+
+/* ================================
+   V13 - Logo Chapa do Bairro dentro da máscara dos cards do dashboard
+================================ */
+.stats .stat {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border-color: rgba(217,106,27,.22);
+}
+
+.stats .stat::before {
+    content: "";
+    position: absolute;
+    right: -34px;
+    top: -34px;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 38%, rgba(217,106,27,.34), rgba(217,106,27,.14) 60%, rgba(217,106,27,.04) 100%);
+    box-shadow: inset 0 0 22px rgba(255,106,0,.12), 0 0 22px rgba(217,106,27,.08);
+    z-index: 0;
+}
+
+.stats .stat::after {
+    content: "";
+    position: absolute;
+    right: -2px;
+    top: 7px;
+    width: 58px;
+    height: 44px;
+    border-radius: 12px;
+    background: url('../img/logo_card_mask.png') center / contain no-repeat;
+    opacity: .38;
+    filter: drop-shadow(0 0 8px rgba(255,106,0,.20));
+    z-index: 1;
+    pointer-events: none;
+}
+
+.stats .stat strong,
+.stats .stat span {
+    position: relative;
+    z-index: 2;
+}
+
+.stats .stat:hover::after {
+    opacity: .55;
+    transform: scale(1.04);
+    transition: .22s ease;
+}
+
+@media (max-width: 720px) {
+    .stats .stat::after {
+        right: 4px;
+        top: 9px;
+        width: 52px;
+        height: 38px;
+    }
+}
+
+
+/* ================================
+   V14/V15 - Ticket de desconto flutuante
+   Ajustado para não bater no botão do WhatsApp
+================================ */
+.floating-discount-ticket {
+    position: fixed;
+    right: 22px;
+    bottom: 158px;
+    z-index: 997;
+    width: min(295px, calc(100vw - 32px));
+    filter: drop-shadow(0 18px 32px rgba(0,0,0,.62)) drop-shadow(0 0 18px rgba(217,106,27,.22));
+    transform-origin: center;
+    animation: chapaTicketSlideIn .75s ease both, chapaTicketFloat 4.4s ease-in-out .75s infinite;
+}
+.floating-discount-ticket.ticket-vertical {
+    width: min(165px, calc(100vw - 38px));
+    bottom: 150px;
+}
+.floating-ticket-link {
+    display: block;
+    position: relative;
+    color: #fff;
+    text-decoration: none;
+}
+.floating-ticket-link img {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform .25s ease, filter .25s ease;
+}
+.floating-ticket-link:hover img {
+    transform: translateY(-4px) rotate(-1deg) scale(1.025);
+    filter: brightness(1.08) saturate(1.08);
+}
+.floating-ticket-close {
+    position: absolute;
+    right: -9px;
+    top: -10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,106,0,.9);
+    background: rgba(5,5,5,.92);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 0 14px rgba(217,106,27,.28);
+}
+.floating-ticket-label {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: -14px;
+    display: grid;
+    gap: 2px;
+    padding: 9px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(217,106,27,.42);
+    background: rgba(8,8,8,.82);
+    backdrop-filter: blur(8px);
+    text-align: center;
+    box-shadow: 0 10px 22px rgba(0,0,0,.35);
+}
+.floating-ticket-label strong {
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-size: .88rem;
+}
+.floating-ticket-label small {
+    color: #f5d7c0;
+    font-weight: 700;
+    line-height: 1.25;
+}
+.ticket-vertical .floating-ticket-label {
+    left: 10px;
+    right: 10px;
+    bottom: -10px;
+}
+.ticket-reward-box {
+    border: 1px solid rgba(217,106,27,.32);
+    background: rgba(217,106,27,.08);
+    color: #ffe5d0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+.ticket-reward-box strong { color: var(--orange); }
+.ticket-admin-preview {
+    border: 1px dashed rgba(217,106,27,.3);
+    background: rgba(0,0,0,.18);
+    border-radius: 16px;
+    padding: 12px;
+    display: grid;
+    gap: 8px;
+}
+.ticket-admin-preview img {
+    width: 100%;
+    max-width: 360px;
+    justify-self: center;
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,.4));
+}
+.ticket-admin-preview small { color: #f3d6c2; }
+@keyframes chapaTicketSlideIn {
+    from { opacity: 0; transform: translateX(120px) rotate(-2deg); }
+    to { opacity: 1; transform: translateX(0) rotate(-2deg); }
+}
+@keyframes chapaTicketFloat {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(-1deg); }
+}
+@media (max-width: 760px) {
+    .floating-discount-ticket {
+        right: 10px;
+        bottom: 118px;
+        width: min(218px, calc(100vw - 22px));
+    }
+    .floating-discount-ticket.ticket-vertical {
+        width: min(128px, calc(100vw - 30px));
+        bottom: 112px;
+    }
+    .floating-ticket-label {
+        display: none;
+    }
+    .floating-ticket-close {
+        right: -6px;
+        top: -8px;
+        width: 28px;
+        height: 28px;
+        font-size: 19px;
+    }
+}
+
+/* V15 - WhatsApp sempre abaixo do ticket */
+.whatsapp-float {
+    right: 22px;
+    bottom: 24px;
+    z-index: 1000;
+}
+@media (max-width: 760px) {
+    .whatsapp-float {
+        right: 12px;
+        bottom: 18px;
+    }
+}
+
+/* ================================
+   V16 - Correção dos botões flutuantes
+   WhatsApp não fica mais por cima da logo de acesso ao admin.
+================================ */
+.whatsapp-float {
+    left: 22px !important;
+    right: auto !important;
+    bottom: 24px !important;
+    z-index: 996 !important;
+}
+.floating-admin-logo {
+    right: 22px !important;
+    bottom: 22px !important;
+    z-index: 1002 !important;
+}
+.floating-discount-ticket {
+    right: 22px !important;
+    bottom: 112px !important;
+    z-index: 997 !important;
+}
+.floating-discount-ticket.ticket-vertical {
+    bottom: 112px !important;
+}
+@media (max-width: 760px) {
+    .whatsapp-float {
+        left: 12px !important;
+        right: auto !important;
+        bottom: 16px !important;
+        max-width: calc(100vw - 92px);
+    }
+    .whatsapp-float strong {
+        display: none !important;
+    }
+    .floating-admin-logo {
+        right: 14px !important;
+        bottom: 14px !important;
+    }
+    .floating-discount-ticket {
+        right: 10px !important;
+        bottom: 88px !important;
+    }
+}
+
+/* ================================
+   V17 - Correção cupom flutuante
+   Garante que o ticket apareça no site e fique acima do conteúdo.
+================================ */
+.floating-discount-ticket {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+.floating-ticket-link,
+.floating-ticket-link img {
+    pointer-events: auto;
+}

@@ -3,25 +3,63 @@
 {% block content %}
 <section class="container">
     <div class="admin-head">
-        <div><h1>Clientes e fidelidade</h1><p class="muted">Histórico básico por celular, pontos e nível do cliente.</p></div>
+        <div>
+            <h1>Clientes e fidelidade</h1>
+            <p class="muted">Histórico básico por celular, pontos e nível do cliente.</p>
+            <p class="muted small">Para excluir um cliente, digite a senha do admin. Os pedidos antigos continuam salvos nos relatórios.</p>
+        </div>
         <a class="btn secondary" href="/admin">Voltar</a>
     </div>
     <div class="table-wrap">
         <table>
-            <thead><tr><th>Cliente</th><th>Telefone</th><th>Nível</th><th>Pedidos</th><th>Pontos</th><th>Total gasto</th><th>Último pedido</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>Status</th>
+                    <th>Nível</th>
+                    <th>Pedidos</th>
+                    <th>Pontos</th>
+                    <th>Total gasto</th>
+                    <th>Último pedido</th>
+                    <th>Tags/Notas</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
             <tbody>
             {% for cliente in clientes %}
                 <tr>
                     <td>{{ cliente.name }}</td>
                     <td>{{ cliente.phone }}</td>
+                    <td>{% if cliente.blocked %}<span class="badge danger">Bloqueado</span>{% else %}<span class="badge success">Ativo</span>{% endif %}</td>
                     <td><span class="badge loyalty-{{ cliente.level()|lower }}">{{ cliente.level() }}</span></td>
                     <td>{{ cliente.total_orders }}</td>
                     <td>{{ cliente.loyalty_points }}</td>
                     <td>R$ {{ "%.2f"|format(cliente.total_spent) }}</td>
                     <td>{{ cliente.last_order_at.strftime('%d/%m/%Y %H:%M') if cliente.last_order_at else '-' }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('admin.update_customer', customer_id=cliente.id) }}" class="inline-settings-form">
+                            <input name="tags" value="{{ cliente.tags or '' }}" placeholder="VIP, problema, frequente">
+                            <input name="notes" value="{{ cliente.notes or '' }}" placeholder="Observação interna">
+                            <button class="btn secondary small" type="submit">Salvar</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form method="post" action="{{ url_for('admin.toggle_customer_block', customer_id=cliente.id) }}" style="margin-bottom:8px">
+                            <button class="btn {% if cliente.blocked %}secondary{% else %}danger{% endif %} small" type="submit">{% if cliente.blocked %}Desbloquear{% else %}Bloquear{% endif %}</button>
+                        </form>
+                        <details class="delete-customer-box">
+                            <summary class="btn danger small">Excluir</summary>
+                            <form method="post" action="{{ url_for('admin.delete_customer', customer_id=cliente.id) }}" onsubmit="return confirm('Tem certeza que deseja excluir este cliente? Essa ação não pode ser desfeita.');">
+                                <label>Senha do admin</label>
+                                <input type="password" name="admin_password" placeholder="Digite a senha" required autocomplete="current-password">
+                                <button class="btn danger full" type="submit">Confirmar exclusão</button>
+                            </form>
+                        </details>
+                    </td>
                 </tr>
             {% else %}
-                <tr><td colspan="7">Nenhum cliente registrado ainda.</td></tr>
+                <tr><td colspan="10">Nenhum cliente registrado ainda.</td></tr>
             {% endfor %}
             </tbody>
         </table>

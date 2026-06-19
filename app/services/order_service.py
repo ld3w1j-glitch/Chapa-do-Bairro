@@ -67,6 +67,12 @@ def update_customer_loyalty(order):
     customer.last_order_at = order.created_at
     return customer
 
+def _ensure_customer_can_order(phone):
+    customer = Customer.query.filter_by(phone=phone).first()
+    if customer and customer.blocked:
+        raise ValueError("Este celular está bloqueado para novos pedidos. Entre em contato com a loja pelo WhatsApp.")
+    return customer
+
 def get_delivery_fees():
     zones = DeliveryZone.query.filter_by(active=True).order_by(DeliveryZone.name).all()
     if zones:
@@ -123,13 +129,16 @@ def create_order_from_form(form):
     product_ids = form.getlist("product_id")
     quantities = form.getlist("quantity")
 
+    customer_phone = normalize_customer_phone(form.get("customer_phone"))
+    _ensure_customer_can_order(customer_phone)
+
     delivery_type = form.get("delivery_type", "retirada")
     delivery_neighborhood = form.get("delivery_neighborhood", "").strip()
     delivery_fee = calculate_delivery_fee(delivery_type, delivery_neighborhood)
 
     order = Order(
         customer_name=form.get("customer_name"),
-        customer_phone=normalize_customer_phone(form.get("customer_phone")),
+        customer_phone=customer_phone,
         address=form.get("address"),
         delivery_type=delivery_type,
         delivery_neighborhood=delivery_neighborhood,
@@ -166,6 +175,7 @@ def create_order_from_form(form):
 def create_order_from_cart(items, form):
     nome = form.get("customer_name", "").strip()
     telefone = normalize_customer_phone(form.get("customer_phone", ""))
+    _ensure_customer_can_order(telefone)
     forma_pagamento = form.get("payment_method", "").strip()
     tipo_entrega = form.get("delivery_type", "retirada")
     endereco = form.get("address", "").strip()

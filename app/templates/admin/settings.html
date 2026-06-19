@@ -3,25 +3,118 @@
 {% block content %}
 <section class="container">
     <div class="admin-head">
-        <div><h1>⚙️ Personalização do Site</h1><p class="muted">Altere informações comerciais sem mexer no código.</p></div>
+        <div>
+            <h1>⚙️ Configurações da Hamburgueria</h1>
+            <p class="muted">Controle loja, entrega, Pix, WhatsApp, visual, pedidos e cozinha em um só lugar.</p>
+        </div>
         <a class="btn secondary" href="/admin">Voltar</a>
     </div>
-    <form class="form-card settings-form" method="post">
-        <label>Nome da marca<input name="store_name" value="{{ settings.store_name }}" required></label>
-        <label>Slogan principal<input name="slogan" value="{{ settings.slogan }}" required></label>
-        <label>Cor principal<input type="color" name="primary_color" value="{{ settings.primary_color }}"></label>
-        <label>Tempo médio de entrega<input name="delivery_time" value="{{ settings.delivery_time }}"></label>
-        <label>Mensagem de funcionamento<textarea name="open_message" rows="3">{{ settings.open_message }}</textarea></label>
-        <label>Chave Pix</label>
-        <input name="pix_key" value="{{ settings.pix_key }}" placeholder="CPF, e-mail, telefone ou chave aleatória">
-        <small class="field-help">A chave aparece no checkout quando o cliente escolhe Pix.</small>
 
-        <label>Nome do recebedor Pix</label>
-        <input name="pix_owner" value="{{ settings.pix_owner }}" placeholder="Nome da empresa ou responsável">
+    <form class="settings-page" method="post">
+        <div class="settings-grid">
+            <article class="settings-section">
+                <h2>🏪 Dados da loja</h2>
+                <label>Nome da marca<input name="store_name" value="{{ settings.store_name }}" required></label>
+                <label>Slogan principal<input name="slogan" value="{{ settings.slogan }}" required></label>
+                <label>Endereço<input name="store_address" value="{{ settings.store_address|default('') }}" placeholder="Rua, número, bairro"></label>
+                <label>Instagram<input name="instagram" value="{{ settings.instagram|default('') }}" placeholder="@chapadobairro"></label>
+                <label>Horário de funcionamento<input name="opening_hours" value="{{ settings.opening_hours|default('Terça a domingo, 18h às 23h') }}"></label>
+                <label>Mensagem quando aberto<textarea name="open_message" rows="2">{{ settings.open_message }}</textarea></label>
+                <label>Mensagem quando fechado<textarea name="closed_message" rows="2">{{ settings.closed_message|default('Estamos fechados no momento. Volte no nosso horário de atendimento!') }}</textarea></label>
+            </article>
 
-        <label>Cidade do Pix</label>
-        <input name="pix_city" value="{{ settings.pix_city|default('MONTES CLAROS') }}" placeholder="MONTES CLAROS">
-        <button class="btn" type="submit">Salvar configurações</button>
+            <article class="settings-section">
+                <h2>🛵 Entrega e pedidos</h2>
+                <label>Tempo médio de entrega<input name="delivery_time" value="{{ settings.delivery_time }}"></label>
+                <label>Pedido mínimo R$<input name="minimum_order" value="{{ settings.minimum_order|default('0') }}" inputmode="decimal"></label>
+                <label>Taxa de serviço R$<input name="service_fee" value="{{ settings.service_fee|default('0') }}" inputmode="decimal"></label>
+                <div class="check-list">
+                    <label><input type="checkbox" name="allow_pickup" {% if settings.allow_pickup|default('on') == 'on' %}checked{% endif %}> Permitir retirada no balcão</label>
+                    <label><input type="checkbox" name="allow_coupon" {% if settings.allow_coupon|default('on') == 'on' %}checked{% endif %}> Permitir cupom no checkout</label>
+                    <label><input type="checkbox" name="require_notes" {% if settings.require_notes == 'on' %}checked{% endif %}> Observação obrigatória</label>
+                    <label><input type="checkbox" name="allow_out_of_stock" {% if settings.allow_out_of_stock == 'on' %}checked{% endif %}> Permitir pedido sem estoque</label>
+                </div>
+                <a class="btn secondary small" href="/admin/fretes">Configurar bairros e fretes</a>
+            </article>
+
+            <article class="settings-section">
+                <h2>💳 Pix</h2>
+                <label>Chave Pix<input name="pix_key" value="{{ settings.pix_key }}" placeholder="CPF, e-mail, telefone ou chave aleatória"></label>
+                <label>Nome do recebedor<input name="pix_owner" value="{{ settings.pix_owner }}" placeholder="Nome da empresa ou responsável"></label>
+                <label>Cidade do Pix<input name="pix_city" value="{{ settings.pix_city|default('MONTES CLAROS') }}" placeholder="MONTES CLAROS"></label>
+                <small class="field-help">Esses dados alimentam o QR Code e o Pix copia e cola do checkout.</small>
+            </article>
+
+            <article class="settings-section">
+                <h2>📲 WhatsApp automático</h2>
+                <label>Pedido recebido<textarea name="whatsapp_received" rows="2">{{ settings.whatsapp_received|default('') }}</textarea></label>
+                <label>Em preparo<textarea name="whatsapp_preparing" rows="2">{{ settings.whatsapp_preparing|default('') }}</textarea></label>
+                <label>Saiu para entrega<textarea name="whatsapp_delivery" rows="2">{{ settings.whatsapp_delivery|default('') }}</textarea></label>
+                <label>Pronto para retirada<textarea name="whatsapp_pickup_ready" rows="2">{{ settings.whatsapp_pickup_ready|default('') }}</textarea></label>
+                <label>Entregue<textarea name="whatsapp_done" rows="2">{{ settings.whatsapp_done|default('') }}</textarea></label>
+            </article>
+
+            <article class="settings-section">
+                <h2>🎨 Visual do site</h2>
+                <label>Cor principal<input type="color" name="primary_color" value="{{ settings.primary_color }}"></label>
+                <label>Frase principal do banner<input name="hero_title" value="{{ settings.hero_title|default('CHAPA QUENTE, HAMBÚRGUER DE VERDADE.') }}"></label>
+                <label>Selo do banner<input name="hero_badge" value="{{ settings.hero_badge|default('🔥 Mais pedido do bairro') }}"></label>
+                <div class="check-list">
+                    <label><input type="checkbox" name="hero_video_enabled" {% if settings.hero_video_enabled|default('on') == 'on' %}checked{% endif %}> Vídeo de fundo ativo</label>
+                    <label><input type="checkbox" name="dark_mode" {% if settings.dark_mode|default('on') == 'on' %}checked{% endif %}> Tema escuro</label>
+                </div>
+            </article>
+
+
+
+            <article class="settings-section ticket-settings-preview">
+                <h2>🎟️ Ticket flutuante</h2>
+                <p class="muted">Mostra o ticket de desconto flutuando no site para chamar o cliente para o cupom.</p>
+                <div class="check-list">
+                    <label><input type="checkbox" name="floating_ticket_enabled" {% if settings.floating_ticket_enabled|default('on') == 'on' %}checked{% endif %}> Ativar ticket flutuante no site</label>
+                </div>
+                <label>Modelo do ticket
+                    <select name="floating_ticket_style">
+                        <option value="horizontal" {% if settings.floating_ticket_style|default('horizontal') == 'horizontal' %}selected{% endif %}>Horizontal inclinado</option>
+                        <option value="vertical" {% if settings.floating_ticket_style == 'vertical' %}selected{% endif %}>Vertical destaque</option>
+                    </select>
+                </label>
+                <label>Código do cupom
+                    <input name="floating_ticket_coupon" value="{{ settings.floating_ticket_coupon|default('CHAPA10') }}" placeholder="CHAPA10" style="text-transform: uppercase;">
+                </label>
+                <label>Combo/produto que o cliente ganha ou recebe o desconto
+                    <select name="floating_ticket_reward_product_id">
+                        <option value="">Selecionar depois / desconto geral</option>
+                        {% for produto in produtos %}
+                            <option value="{{ produto.id }}" {% if settings.floating_ticket_reward_product_id|string == produto.id|string %}selected{% endif %}>{{ produto.name }} - {{ produto.price_br() }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Texto curto abaixo do ticket
+                    <input name="floating_ticket_text" value="{{ settings.floating_ticket_text|default('Ganhe desconto especial no seu primeiro pedido!') }}" placeholder="Ex: Válido no combo selecionado">
+                </label>
+                <div class="ticket-admin-preview">
+                    <img src="{{ url_for('static', filename='img/ticket_desconto_horizontal.png') }}" alt="Prévia ticket horizontal">
+                    <small>O cliente pode fechar o ticket e clicar nele para aplicar o cupom automaticamente no checkout.</small>
+                </div>
+            </article>
+
+            <article class="settings-section">
+                <h2>👨‍🍳 Cozinha</h2>
+                <label>Autoatualização da cozinha em segundos<input name="kitchen_autorefresh" value="{{ settings.kitchen_autorefresh|default('15') }}" inputmode="numeric"></label>
+                <div class="check-list">
+                    <label><input type="checkbox" name="kitchen_sound" {% if settings.kitchen_sound|default('on') == 'on' %}checked{% endif %}> Som de novo pedido</label>
+                    <label><input type="checkbox" name="kitchen_fullscreen" {% if settings.kitchen_fullscreen == 'on' %}checked{% endif %}> Sugerir modo tela cheia</label>
+                    <label><input type="checkbox" name="auto_print_ticket" {% if settings.auto_print_ticket == 'on' %}checked{% endif %}> Impressão automática da comanda</label>
+                </div>
+                <a class="btn secondary small" href="/admin/cozinha">Abrir painel da cozinha</a>
+            </article>
+        </div>
+
+        <div class="settings-actions">
+            <button class="btn" type="submit">Salvar configurações</button>
+            <a class="btn secondary" href="/admin/relatorios/imprimir" target="_blank">Imprimir relatório</a>
+        </div>
     </form>
 </section>
 {% endblock %}

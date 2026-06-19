@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Lucro por Produto | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>📊 Custo e Lucro por Produto</h1>
+            <p class="muted">Usa a ficha técnica para calcular custo, margem e unidades possíveis pelo estoque atual.</p>
+        </div>
+        <div class="quick-actions">
+            <a class="btn" href="/admin/estoque/previsao-lucro">Simular quantidades</a>
+            <button class="btn secondary" onclick="window.print()">Imprimir</button>
+            <a class="btn secondary" href="/admin/relatorios">Voltar</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Venda</th>
+                    <th>Custo</th>
+                    <th>Lucro estimado</th>
+                    <th>Margem</th>
+                    <th>Produção possível</th>
+                    <th>Ficha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td><strong>{{ row.produto.name }}</strong></td>
+                    <td>{{ row.produto.price_br() }}</td>
+                    <td>R$ {{ "%.2f"|format(row.cost) }}</td>
+                    <td class="profit-positive">R$ {{ "%.2f"|format(row.profit) }}</td>
+                    <td>{{ "%.1f"|format(row.margin) }}%</td>
+                    <td>{{ row.possible }} un.</td>
+                    <td><a href="/admin/estoque/ficha-tecnica/{{ row.produto.id }}">Abrir</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7">Nenhum produto cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

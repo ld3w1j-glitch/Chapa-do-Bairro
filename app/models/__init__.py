@@ -12,3 +12,5 @@ from app.models.coupon import Coupon
 from app.models.customer import Customer
 
 from app.models.delivery_zone import DeliveryZone
+
+from app.models.audit_log import AuditLog

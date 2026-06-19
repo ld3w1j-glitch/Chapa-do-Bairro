@@ -8,7 +8,14 @@
             <h1>Compras sugeridas</h1>
             <p class="muted">Lista baseada no estoque mínimo de cada insumo.</p>
         </div>
-        <a class="btn secondary" href="/admin/estoque">Voltar</a>
+        <div class="quick-actions"><button class="btn" onclick="window.print()">Imprimir</button><a class="btn" href="/admin/estoque/compras-sugeridas/exportar">Exportar CSV</a><a class="btn secondary" href="/admin/estoque">Voltar</a></div>
+    </div>
+
+    {% set total_estimado_compras = namespace(value=0) %}
+    {% for item in suggestions %}{% set total_estimado_compras.value = total_estimado_compras.value + (item.suggested_purchase() * item.cost_per_unit) %}{% endfor %}
+    <div class="stats">
+        <div class="stat"><strong>{{ suggestions|length }}</strong><span>Itens para comprar</span></div>
+        <div class="stat"><strong>R$ {{ "%.2f"|format(total_estimado_compras.value) }}</strong><span>Custo estimado</span></div>
     </div>
 
     <div class="table-wrap">

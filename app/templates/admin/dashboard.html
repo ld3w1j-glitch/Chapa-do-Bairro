@@ -20,6 +20,8 @@
         <div class="stat"><strong>{{ low_stock }}</strong><span>Itens com estoque baixo</span></div>
         <div class="stat"><strong>{{ total_customers }}</strong><span>Clientes cadastrados</span></div>
         <div class="stat"><strong>{{ vip_customers }}</strong><span>Clientes VIP</span></div>
+        <div class="stat"><strong>{{ blocked_customers }}</strong><span>Clientes bloqueados</span></div>
+        <div class="stat"><strong>{{ audit_today }}</strong><span>Ações hoje</span></div>
         <div class="stat"><strong>R$ {{ "%.2f"|format(revenue_today) }}</strong><span>Faturamento hoje</span></div>
         <div class="stat"><strong>R$ {{ "%.2f"|format(avg_ticket) }}</strong><span>Ticket médio</span></div>
         <div class="stat"><strong>{{ peak_hour }}</strong><span>Horário de pico</span></div>
@@ -34,11 +36,15 @@
         <a class="btn" href="/admin/entregadores">Entregadores</a>
         <a class="btn" href="/admin/pedidos/historico">Histórico</a>
         <a class="btn" href="/admin/relatorios">Relatórios</a>
+        <a class="btn" href="/admin/financeiro/caixa">Fechamento de Caixa</a>
+        <a class="btn" href="/admin/relatorios/lucro-produtos">Lucro por Produto</a>
         <a class="btn" href="/admin/campanhas">Campanhas</a>
         <a class="btn" href="/admin/cupons">Cupons</a>
         <a class="btn" href="/admin/fretes">Fretes por Bairro</a>
         <a class="btn" href="/admin/clientes">Clientes</a>
         <a class="btn" href="/admin/configuracoes">Configurações</a>
+        <a class="btn" href="/admin/auditoria">Auditoria</a>
+        <a class="btn" href="/admin/backup/completo">Backup completo</a>
         <a class="btn" href="/admin/estoque">Estoque Inteligente</a>
     </div>
 

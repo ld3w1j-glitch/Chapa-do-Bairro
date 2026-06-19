@@ -166,3 +166,46 @@ if ('serviceWorker' in navigator) {
 if (window.location.pathname.includes('/admin/cozinha')) {
     setTimeout(() => window.location.reload(), 45000);
 }
+
+
+// V17 - Ticket flutuante: corrigido para aparecer novamente.
+// Antes ele podia ficar oculto para sempre por causa do localStorage.
+(() => {
+    const ticket = document.querySelector('.floating-discount-ticket');
+    if (!ticket) return;
+
+    // Remove o bloqueio antigo salvo no navegador, garantindo que o cupom volte a aparecer.
+    localStorage.removeItem('chapa_ticket_hidden');
+
+    const close = ticket.querySelector('.floating-ticket-close');
+    const link = ticket.querySelector('.floating-ticket-link');
+    const coupon = (ticket.dataset.ticketCoupon || 'CHAPA10').trim().toUpperCase();
+
+    ticket.style.display = 'block';
+
+    // Ao fechar, esconde apenas enquanto a aba atual estiver aberta.
+    if (sessionStorage.getItem('chapa_ticket_hidden_session') === '1') {
+        ticket.style.display = 'none';
+    }
+
+    if (close) {
+        close.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            ticket.style.display = 'none';
+            sessionStorage.setItem('chapa_ticket_hidden_session', '1');
+        });
+    }
+
+    if (link) {
+        link.addEventListener('click', () => {
+            localStorage.setItem('chapa_ticket_coupon', coupon);
+        });
+    }
+
+    const couponInput = document.getElementById('coupon_code');
+    const savedCoupon = localStorage.getItem('chapa_ticket_coupon');
+    if (couponInput && savedCoupon && !couponInput.value) {
+        couponInput.value = savedCoupon;
+    }
+})();

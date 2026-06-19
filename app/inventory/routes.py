@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+import csv
+import io
+from flask import Blueprint, render_template, request, redirect, url_for, flash, Response
 from app.core.security import login_required
 from app.extensions import db
 from app.models.supplier import Supplier
@@ -157,6 +159,27 @@ def purchase_suggestions():
     suggestions = [i for i in ingredients if i.suggested_purchase() > 0]
     return render_template("inventory/purchase_suggestions.html", suggestions=suggestions)
 
+
+
+@inventory_bp.route("/compras-sugeridas/exportar")
+@login_required
+def export_purchase_suggestions():
+    ingredients = Ingredient.query.filter_by(active=True).order_by(Ingredient.name).all()
+    suggestions = [i for i in ingredients if i.suggested_purchase() > 0]
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=';')
+    writer.writerow(["Insumo", "Estoque atual", "Estoque minimo", "Comprar", "Unidade", "Fornecedor", "Custo estimado"])
+    for item in suggestions:
+        writer.writerow([
+            item.name,
+            f"{item.current_stock:g}",
+            f"{item.minimum_stock:g}",
+            f"{item.suggested_purchase():.2f}",
+            item.unit,
+            item.supplier.name if item.supplier else "",
+            f"{item.suggested_purchase() * item.cost_per_unit:.2f}",
+        ])
+    return Response(output.getvalue(), mimetype="text/csv; charset=utf-8", headers={"Content-Disposition": "attachment; filename=lista_compras_chapa_do_bairro.csv"})
 
 @inventory_bp.route("/previsao-lucro", methods=["GET", "POST"])
 @login_required

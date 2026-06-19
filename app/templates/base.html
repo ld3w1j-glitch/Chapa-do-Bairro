@@ -26,6 +26,31 @@
 
     {% include "partials/footer.html" %}
 
+
+
+    {% if site_settings.floating_ticket_enabled|default('on') == 'on' %}
+    <aside class="floating-discount-ticket {{ 'ticket-vertical' if site_settings.floating_ticket_style == 'vertical' else 'ticket-horizontal' }}"
+           data-ticket-coupon="{{ site_settings.floating_ticket_coupon|default('CHAPA10') }}"
+           aria-label="Ticket de desconto Chapa do Bairro">
+        <button class="floating-ticket-close" type="button" aria-label="Fechar ticket">×</button>
+        <a class="floating-ticket-link" href="/checkout" title="Aplicar cupom {{ site_settings.floating_ticket_coupon|default('CHAPA10') }}">
+            {% if site_settings.floating_ticket_style == 'vertical' %}
+                <img src="{{ url_for('static', filename='img/ticket_desconto_vertical.png') }}" alt="Ticket de desconto Chapa do Bairro">
+            {% else %}
+                <img src="{{ url_for('static', filename='img/ticket_desconto_horizontal.png') }}" alt="Ticket de desconto Chapa do Bairro">
+            {% endif %}
+            <span class="floating-ticket-label">
+                <strong>Cupom {{ site_settings.floating_ticket_coupon|default('CHAPA10') }}</strong>
+                {% if site_settings.floating_ticket_reward_product_name %}
+                    <small>Selecionado: {{ site_settings.floating_ticket_reward_product_name }}</small>
+                {% else %}
+                    <small>{{ site_settings.floating_ticket_text|default('Ganhe desconto especial no seu primeiro pedido!') }}</small>
+                {% endif %}
+            </span>
+        </a>
+    </aside>
+    {% endif %}
+
     <a class="whatsapp-float" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener" aria-label="Pedir pelo WhatsApp">
         <span>💬</span>
         <strong>Pedir no WhatsApp</strong>

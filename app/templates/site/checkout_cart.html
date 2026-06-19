@@ -67,6 +67,11 @@
                 <input name="coupon_code" id="coupon_code" placeholder="Ex: VOLTE10" style="text-transform: uppercase;">
                 <small>Use cupons cadastrados no painel administrativo.</small>
             </div>
+            {% if site_settings.floating_ticket_reward_product_name %}
+            <div class="ticket-reward-box">
+                🎟️ Ticket ativo: use <strong>{{ site_settings.floating_ticket_coupon|default('CHAPA10') }}</strong> para aproveitar no combo/produto <strong>{{ site_settings.floating_ticket_reward_product_name }}</strong>.
+            </div>
+            {% endif %}
 
             <label>Forma de pagamento</label>
             <select name="payment_method" id="payment_method" required>
@@ -166,6 +171,12 @@
     updatePaymentBoxes();
     if(neighborhood) neighborhood.addEventListener('change', updateDeliveryFee);
     updateDeliveryFee();
+
+    const couponInput = document.getElementById('coupon_code');
+    const savedCoupon = localStorage.getItem('chapa_ticket_coupon');
+    if(couponInput && savedCoupon && !couponInput.value){
+        couponInput.value = savedCoupon.toUpperCase();
+    }
 })();
 </script>
 {% endblock %}

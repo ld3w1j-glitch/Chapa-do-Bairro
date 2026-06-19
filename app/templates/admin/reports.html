@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Admin | Relatórios{% endblock %}
 {% block content %}
-<div class="container"><a class="btn" href="{{ url_for('admin.print_reports') }}">Imprimir / salvar PDF</a></div>
+<div class="container quick-actions">
+    <a class="btn" href="{{ url_for('admin.print_reports') }}">Imprimir / salvar PDF</a>
+    <a class="btn" href="{{ url_for('admin.cash_closing') }}">Fechamento de caixa</a>
+    <a class="btn" href="{{ url_for('admin.product_profit_report') }}">Lucro por produto</a>
+</div>
 <section class="container">
     <div class="admin-head">
         <div><h1>Relatórios de vendas</h1><p class="muted">Considera apenas pedidos finalizados.</p></div>

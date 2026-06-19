@@ -12,6 +12,9 @@ class Customer(db.Model):
     loyalty_points = db.Column(db.Integer, nullable=False, default=0)
     last_order_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    blocked = db.Column(db.Boolean, nullable=False, default=False)
+    tags = db.Column(db.String(255), nullable=True, default="")
+    notes = db.Column(db.Text, nullable=True)
 
     def level(self):
         if self.total_orders >= 10 or self.total_spent >= 500:

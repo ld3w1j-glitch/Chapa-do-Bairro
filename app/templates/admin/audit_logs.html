@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Auditoria | Admin{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>Auditoria de ações</h1>
+            <p class="muted">Registro das principais alterações feitas no sistema.</p>
+        </div>
+        <a class="btn secondary" href="/admin">Voltar</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Item</th><th>Detalhes</th></tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.created_br() }}</td>
+                    <td>{{ log.username }}</td>
+                    <td><span class="badge">{{ log.action }}</span></td>
+                    <td>{{ log.entity or '-' }} {{ '#' ~ log.entity_id if log.entity_id else '' }}</td>
+                    <td>{{ log.details or '-' }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5">Nenhuma ação registrada ainda.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
