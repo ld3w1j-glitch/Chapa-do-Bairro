@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Admin | Relatórios{% endblock %}
+{% block content %}
+<div class="container"><a class="btn" href="{{ url_for('admin.print_reports') }}">Imprimir / salvar PDF</a></div>
+<section class="container">
+    <div class="admin-head">
+        <div><h1>Relatórios de vendas</h1><p class="muted">Considera apenas pedidos finalizados.</p></div>
+        <div class="quick-actions"><a class="btn" href="/admin/relatorios/exportar">Exportar CSV</a><a class="btn secondary" href="/admin">Voltar</a></div>
+    </div>
+
+    <div class="stats">
+        <div class="stat"><strong>R$ {{ "%.2f"|format(revenue_today) }}</strong><span>Vendas hoje</span></div>
+        <div class="stat"><strong>{{ orders_today }}</strong><span>Pedidos hoje</span></div>
+        <div class="stat"><strong>R$ {{ "%.2f"|format(revenue_month) }}</strong><span>Vendas no mês</span></div>
+        <div class="stat"><strong>{{ orders_month }}</strong><span>Pedidos no mês</span></div>
+        <div class="stat"><strong>R$ {{ "%.2f"|format(avg_ticket) }}</strong><span>Ticket médio</span></div>
+    </div>
+
+    <h2>Vendas por forma de pagamento</h2>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Pagamento</th><th>Pedidos</th><th>Total</th></tr></thead>
+            <tbody>
+                {% for payment, count, total in by_payment %}
+                <tr><td>{{ payment or '-' }}</td><td>{{ count }}</td><td>R$ {{ "%.2f"|format(total) }}</td></tr>
+                {% else %}
+                <tr><td colspan="3">Nenhum pedido finalizado ainda.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

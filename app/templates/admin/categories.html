@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Admin | Categorias{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <h1>Categorias</h1>
+        <a class="btn secondary" href="/admin">Voltar</a>
+    </div>
+
+    <form class="inline-form" method="post" action="/admin/categorias/nova">
+        <input name="name" placeholder="Nova categoria" required>
+        <button class="btn" type="submit">Adicionar</button>
+    </form>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Nome</th><th>Status</th><th>Ação</th></tr>
+            </thead>
+            <tbody>
+                {% for categoria in categorias %}
+                <tr>
+                    <td>{{ categoria.name }}</td>
+                    <td>{{ "Ativa" if categoria.active else "Inativa" }}</td>
+                    <td>
+                        <form method="post" action="/admin/categorias/{{ categoria.id }}/toggle">
+                            <button class="table-button" type="submit">Ativar/Inativar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

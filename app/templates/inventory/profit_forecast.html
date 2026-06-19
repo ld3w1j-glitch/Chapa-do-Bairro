@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Previsão de Lucro | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>Previsão de lucro</h1>
+            <p class="muted">Simule o lucro por quantidade vendida usando a ficha técnica de cada produto.</p>
+        </div>
+        <a class="btn secondary" href="/admin/estoque">Voltar</a>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <strong>R$ {{ "%.2f"|format(total_revenue) }}</strong>
+            <span>Faturamento previsto</span>
+        </div>
+        <div class="stat">
+            <strong>R$ {{ "%.2f"|format(total_cost) }}</strong>
+            <span>Custo previsto</span>
+        </div>
+        <div class="stat">
+            <strong>R$ {{ "%.2f"|format(total_profit) }}</strong>
+            <span>Lucro previsto</span>
+        </div>
+        <div class="stat">
+            <strong>{{ "%.1f"|format(total_margin) }}%</strong>
+            <span>Margem estimada</span>
+        </div>
+    </div>
+
+    <form method="post" class="panel profit-form">
+        <h2>Quantidade vendida por produto</h2>
+        <p class="muted">Altere as quantidades para visualizar a previsão.</p>
+
+        <div class="profit-input-grid">
+            {% for row in rows %}
+            <label class="profit-input-card">
+                <span>{{ row.product.name }}</span>
+                <input type="number" name="quantity_{{ row.product.id }}" value="{{ row.quantity }}" min="0">
+            </label>
+            {% endfor %}
+        </div>
+
+        <button class="btn" type="submit">Calcular previsão</button>
+    </form>
+
+    <section class="profit-chart panel">
+        <div class="section-head">
+            <div>
+                <h2>Gráfico de lucro estimado</h2>
+                <p class="muted">Barras verticais crescendo de baixo para cima.</p>
+            </div>
+        </div>
+
+        <div class="profit-column-chart">
+            {% for row in rows %}
+            <div class="profit-column-item">
+                <div class="profit-column-value">R$ {{ "%.2f"|format(row.profit) }}</div>
+
+                <div class="profit-column-track">
+                    <div class="profit-column-fill" style="height: {{ row.bar_width }}%;"></div>
+                </div>
+
+                <div class="profit-column-label">
+                    <strong>{{ row.product.name }}</strong>
+                    <span>{{ row.quantity }} un.</span>
+                </div>
+            </div>
+            {% else %}
+            <p class="muted">Nenhum produto cadastrado.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Qtd.</th>
+                    <th>Preço venda</th>
+                    <th>Custo un.</th>
+                    <th>Lucro un.</th>
+                    <th>Faturamento</th>
+                    <th>Custo total</th>
+                    <th>Lucro total</th>
+                    <th>Margem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ row.product.name }}</td>
+                    <td>{{ row.quantity }}</td>
+                    <td>{{ row.product.price_br() }}</td>
+                    <td>R$ {{ "%.2f"|format(row.unit_cost) }}</td>
+                    <td>R$ {{ "%.2f"|format(row.unit_profit) }}</td>
+                    <td>R$ {{ "%.2f"|format(row.revenue) }}</td>
+                    <td>R$ {{ "%.2f"|format(row.cost) }}</td>
+                    <td>R$ {{ "%.2f"|format(row.profit) }}</td>
+                    <td>{{ "%.1f"|format(row.margin) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

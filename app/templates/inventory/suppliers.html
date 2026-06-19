@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Fornecedores | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <h1>Fornecedores</h1>
+        <div>
+            <a class="btn secondary" href="/admin/estoque">Voltar</a>
+            <a class="btn" href="/admin/estoque/fornecedores/novo">Novo fornecedor</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Nome</th><th>Telefone</th><th>Status</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+                {% for fornecedor in fornecedores %}
+                <tr>
+                    <td>{{ fornecedor.name }}</td>
+                    <td>{{ fornecedor.phone or "-" }}</td>
+                    <td>{{ "Ativo" if fornecedor.active else "Inativo" }}</td>
+                    <td><a href="/admin/estoque/fornecedores/{{ fornecedor.id }}/editar">Editar</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4">Nenhum fornecedor cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

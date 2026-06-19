@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Admin | Produto{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <form class="form-card wide" method="post" enctype="multipart/form-data">
+        <h1>{{ "Editar produto" if produto else "Novo produto" }}</h1>
+
+        <label>Nome</label>
+        <input name="name" value="{{ produto.name if produto else '' }}" required>
+
+        <label>Descrição</label>
+        <textarea name="description" rows="4" required>{{ produto.description if produto else '' }}</textarea>
+
+        <label>Preço</label>
+        <input name="price" value="{{ produto.price if produto else '' }}" placeholder="24.90" required>
+
+        <label>Categoria</label>
+        <select name="category_id" required>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}" {% if produto and produto.category_id == categoria.id %}selected{% endif %}>
+                    {{ categoria.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Imagem</label>
+        <input type="file" name="image" accept="image/png,image/jpeg,image/webp">
+
+        {% if produto and produto.image %}
+            <img class="preview" src="{{ url_for('static', filename='uploads/' + produto.image) }}" alt="{{ produto.name }}">
+        {% endif %}
+
+        <label class="check"><input type="checkbox" name="active" {% if not produto or produto.active %}checked{% endif %}> Ativo</label>
+        <label class="check"><input type="checkbox" name="featured" {% if produto and produto.featured %}checked{% endif %}> Destaque na página inicial</label>
+
+        <button class="btn full" type="submit">Salvar</button>
+        <a class="link" href="/admin/produtos">Voltar</a>
+    </form>
+</section>
+{% endblock %}

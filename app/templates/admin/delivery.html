@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Entregadores{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>🛵 Gestão de Entregadores</h1>
+            <p class="muted">Controle visual para acompanhar quem está disponível e quais pedidos saíram para entrega.</p>
+        </div>
+        <a class="btn secondary" href="/admin">Dashboard</a>
+    </div>
+
+    <div class="grid">
+        {% for e in entregadores %}
+        <article class="panel delivery-card">
+            <h2>{{ e.nome }}</h2>
+            <p>{{ e.telefone }}</p>
+            <span class="badge">{{ e.status }}</span>
+        </article>
+        {% endfor %}
+    </div>
+
+    <h2 class="category-title">Pedidos em rota</h2>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>#</th><th>Cliente</th><th>Bairro</th><th>Total</th><th>Abrir</th></tr></thead>
+            <tbody>
+            {% for pedido in pedidos_entrega %}
+                <tr><td>#{{ pedido.id }}</td><td>{{ pedido.customer_name }}</td><td>{{ pedido.delivery_neighborhood or '-' }}</td><td>{{ pedido.total_br() }}</td><td><a href="/admin/pedidos/{{ pedido.id }}">Ver</a></td></tr>
+            {% else %}
+                <tr><td colspan="5">Nenhum pedido em entrega agora.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

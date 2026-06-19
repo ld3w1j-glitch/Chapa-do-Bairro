@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Fazer Pedido | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <h1>Fazer pedido</h1>
+    <p class="muted">Este pedido aparece no painel administrativo.</p>
+
+    <form class="order-form" method="post">
+        <div class="form-grid">
+            <div>
+                <label>Nome do cliente</label>
+                <input name="customer_name" required>
+            </div>
+            <div>
+                <label>Telefone</label>
+                <div class="phone-input-row">
+                    <span class="phone-prefix">+55 (35)</span>
+                    <input name="customer_phone" inputmode="numeric" pattern="9[0-9]{8}" minlength="9" maxlength="9" placeholder="999999999" autocomplete="tel" required>
+                </div>
+                <small class="field-help">Digite apenas o celular com 9 dígitos. O sistema adiciona automaticamente +55 (35).</small>
+            </div>
+        </div>
+
+        <label>Tipo</label>
+        <select name="delivery_type">
+            <option value="retirada">Retirada</option>
+            <option value="entrega">Entrega</option>
+        </select>
+
+        <label>Endereço, se for entrega</label>
+        <input name="address">
+
+        <h2>Produtos</h2>
+        <div class="order-products">
+            {% for produto in produtos %}
+            <div class="order-row">
+                <input type="hidden" name="product_id" value="{{ produto.id }}">
+                <div>
+                    <strong>{{ produto.name }}</strong>
+                    <span>{{ produto.price_br() }}</span>
+                </div>
+                <input type="number" name="quantity" value="0" min="0">
+            </div>
+            {% endfor %}
+        </div>
+
+        <label>Observações</label>
+        <textarea name="notes" rows="3"></textarea>
+
+        <button class="btn" type="submit">Enviar pedido</button>
+    </form>
+</section>
+{% endblock %}

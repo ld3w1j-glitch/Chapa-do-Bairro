@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Admin | Produtos{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <h1>Produtos</h1>
+        <div>
+            <a class="btn secondary" href="/admin">Voltar</a>
+            <a class="btn" href="/admin/produtos/novo">Novo produto</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th><th>Categoria</th><th>Preço</th><th>Status</th><th>Destaque</th><th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in produtos %}
+                <tr>
+                    <td>{{ produto.name }}</td>
+                    <td>{{ produto.category.name }}</td>
+                    <td>{{ produto.price_br() }}</td>
+                    <td>{{ "Ativo" if produto.active else "Inativo" }}</td>
+                    <td>{{ "Sim" if produto.featured else "Não" }}</td>
+                    <td class="actions">
+                        <a href="/admin/produtos/{{ produto.id }}/editar">Editar</a>
+                        <form method="post" action="/admin/produtos/{{ produto.id }}/excluir" onsubmit="return confirm('Excluir produto?')">
+                            <button type="submit">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6">Nenhum produto cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

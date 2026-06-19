@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Admin | Campanhas{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div><h1>🎯 Campanhas de Retorno</h1><p class="muted">Clientes finalizados que não compram há mais de 15 dias.</p></div>
+        <a class="btn secondary" href="/admin">Voltar</a>
+    </div>
+
+    <div class="panel campaign-box">
+        <h2>Cupom sugerido: {{ cupom }}</h2>
+        <p>{{ mensagem }}</p>
+        <small class="muted">Use os botões abaixo para abrir o WhatsApp com a mensagem pronta.</small>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Cliente</th><th>Telefone</th><th>Último pedido</th><th>Total de pedidos</th><th>Ação</th></tr></thead>
+            <tbody>
+                {% for nome, telefone, last_order, total_orders in clientes %}
+                <tr>
+                    <td>{{ nome }}</td>
+                    <td>{{ telefone }}</td>
+                    <td>{{ last_order.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ total_orders }}</td>
+                    <td><a class="mini-btn" target="_blank" href="https://wa.me/{{ telefone }}?text={{ mensagem|urlencode }}">Enviar cupom</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5">Nenhum cliente elegível para campanha agora.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

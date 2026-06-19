@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Comanda #{{ pedido.id }}{% endblock %}
+{% block content %}
+<section class="kitchen-ticket">
+    <div class="no-print" style="display:flex; gap:8px; justify-content:space-between; margin-bottom:12px;">
+        <a class="btn secondary" href="/admin/pedidos/{{ pedido.id }}">Voltar</a>
+        <button class="btn" onclick="window.print()" type="button">Imprimir agora</button>
+    </div>
+
+    <h2>{{ store_name }}</h2>
+    <h1>Pedido #{{ pedido.id }}</h1>
+    <p>{{ pedido.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+
+    <div class="ticket-line">
+        <strong>Cliente:</strong> {{ pedido.customer_name }}<br>
+        <strong>Telefone:</strong> {{ pedido.customer_phone }}<br>
+        <strong>Tipo:</strong> {{ pedido.delivery_type|upper }}<br>
+        {% if pedido.delivery_type == 'entrega' %}
+            <strong>Bairro:</strong> {{ pedido.delivery_neighborhood or '-' }}<br>
+            <strong>Endereço:</strong> {{ pedido.address or '-' }}<br>
+        {% endif %}
+    </div>
+
+    <div class="ticket-line">
+        <h3>Itens</h3>
+        <table>
+            <tbody>
+            {% for item in pedido.items %}
+                <tr>
+                    <td><strong>{{ item.quantity }}x</strong> {{ item.product.name }}</td>
+                    <td style="text-align:right;">R$ {{ '%.2f'|format(item.subtotal) }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pedido.notes %}
+    <div class="ticket-line">
+        <h3>Observações</h3>
+        <p>{{ pedido.notes }}</p>
+    </div>
+    {% endif %}
+
+    <div class="ticket-line">
+        <p><strong>Pagamento:</strong> {{ pedido.payment_method or '-' }}</p>
+        {% if pedido.cash_change_for %}<p><strong>Troco para:</strong> R$ {{ pedido.cash_change_for }}</p>{% endif %}
+        <p><strong>Taxa entrega:</strong> R$ {{ '%.2f'|format(pedido.delivery_fee or 0) }}</p>
+        <p class="ticket-total">Total: {{ pedido.total_br() }}</p>
+    </div>
+
+    <p style="text-align:center; margin-top:18px;">🔥 CHAPA QUENTE, HAMBÚRGUER DE VERDADE 🔥</p>
+</section>
+<script>setTimeout(() => window.print(), 400);</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ store_name }} | Início{% endblock %}
+
+{% block content %}
+<section class="hero hero-video-section">
+    <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="{{ url_for('static', filename='videos/burger-loop.mp4') }}" type="video/mp4">
+    </video>
+    <div class="hero-video-overlay"></div>
+    <div class="hero-content">
+        <span class="tag">🔥 Hamburgueria artesanal de bairro</span>
+        <h1>{{ site_settings.slogan|upper }}</h1>
+        <p>{{ site_settings.open_message }} • Tempo médio: {{ site_settings.delivery_time }}.</p>
+        {% if destaques %}
+            {% set produto_hero = destaques[0] %}
+            <div class="hero-offer">
+                <span class="offer-kicker">🏆 Mais pedido da casa</span>
+                <strong>{{ produto_hero.name }}</strong>
+                <small>{{ produto_hero.description }}</small>
+                <b>{{ produto_hero.price_br() }}</b>
+            </div>
+        {% endif %}
+        <div class="delivery-clock">
+            <span>⏱️ Tempo médio hoje</span>
+            <strong>25 a 35 min</strong>
+        </div>
+        <div class="hero-actions">
+            <a href="/cardapio" class="btn">Pedir agora</a>
+            <a href="/carrinho" class="btn secondary">Ver carrinho</a>
+        </div>
+    </div>
+</section>
+<section class="container sales-strip">
+    <div class="sales-pill">🍔 Feito na chapa</div>
+    <div class="sales-pill">⚡ Pedido rápido</div>
+    <div class="sales-pill">📲 Finalização pelo WhatsApp</div>
+    <div class="sales-pill">🔥 Combos e adicionais</div>
+</section>
+
+<section class="container loyalty-banner">
+    <div>
+        <span class="offer-kicker">Programa de fidelidade</span>
+        <h2>Junte pedidos e ganhe recompensa</h2>
+        <p>A cada 10 pedidos cadastrados no mesmo telefone, o cliente ganha um mimo da casa. Ideal para trazer o bairro de volta.</p>
+    </div>
+    <a class="btn secondary" href="/cardapio">Começar agora</a>
+</section>
+
+<section class="container">
+    <div class="section-head">
+        <h2>Mais pedidos da casa</h2>
+        <a href="/cardapio">Ver tudo</a>
+    </div>
+
+    <div class="grid">
+        {% for produto in destaques %}
+        <article class="card product-card">
+            {% if produto.image %}
+                <img src="{{ url_for('static', filename='uploads/' + produto.image) }}" alt="{{ produto.name }}">
+            {% else %}
+                <div class="placeholder">🍔</div>
+            {% endif %}
+            <small class="product-badge">🔥 Mais pedido • {{ produto.category.name }}</small>
+            <h3>{{ produto.name }}</h3>
+            <p>{{ produto.description }}</p>
+            <div class="product-meta">
+                <strong>{{ produto.price_br() }}</strong>
+                <span>⏱️ 20-35 min</span>
+            </div>
+            <form method="post" action="/carrinho/adicionar/{{ produto.id }}">
+                <button class="btn full" type="submit">Adicionar ao carrinho</button>
+            </form>
+        </article>
+        {% else %}
+            <p class="muted">Nenhum produto em destaque ainda.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+

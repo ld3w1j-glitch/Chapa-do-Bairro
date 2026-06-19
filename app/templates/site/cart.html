@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Carrinho | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="section-head">
+        <div>
+            <h1>Seu carrinho</h1>
+            <p class="muted">Revise os itens antes de finalizar o pedido.</p>
+        </div>
+        <a href="/cardapio" class="btn secondary">Adicionar mais</a>
+    </div>
+
+    {% if items %}
+    <form method="post" action="/carrinho/atualizar">
+        <div class="cart-list">
+            {% for item in items %}
+            <div class="cart-item">
+                <div>
+                    <h3>{{ item.product.name }}</h3>
+                    <p>{{ item.product.description }}</p>
+                    <strong>{{ item.product.price_br() }} cada</strong>
+                </div>
+
+                <div class="cart-actions">
+                    <label>Qtd.</label>
+                    <input type="number" name="quantity_{{ item.product.id }}" value="{{ item.quantity }}" min="0">
+                    <span>{{ money_br(item.subtotal) }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="upsell-box">
+            <div>
+                <span class="offer-kicker">Complete seu pedido</span>
+                <h3>Quer transformar em combo?</h3>
+                <p>Adicione batata, refrigerante ou molho extra no cardápio antes de finalizar.</p>
+            </div>
+            <a class="btn secondary" href="/cardapio">Ver adicionais</a>
+        </div>
+
+        <div class="order-progress preview-progress">
+            <div class="progress-step active">1<span>Recebido</span></div>
+            <div class="progress-step">2<span>Em preparo</span></div>
+            <div class="progress-step">3<span>Saiu</span></div>
+            <div class="progress-step">4<span>Entregue</span></div>
+        </div>
+
+        <div class="coupon-card">
+            <strong>🎁 Cupom de retorno</strong>
+            <span>Depois de 7 dias sem comprar, envie VOLTE10 no WhatsApp e reative o cliente com desconto.</span>
+        </div>
+
+        <div class="cart-summary">
+            <h2>Total: {{ money_br(total) }}</h2>
+            <div class="hero-actions">
+                <button class="btn secondary" type="submit">Atualizar carrinho</button>
+                <a class="btn" href="/checkout">Finalizar pedido</a>
+            </div>
+        </div>
+    </form>
+
+    <form method="post" action="/carrinho/limpar" class="clear-cart-form">
+        <button class="table-button" type="submit">Limpar carrinho</button>
+    </form>
+    {% else %}
+        <div class="panel">
+            <h2>Seu carrinho está vazio.</h2>
+            <p class="muted">Volte ao cardápio e adicione seus produtos.</p>
+            <a href="/cardapio" class="btn">Ver cardápio</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

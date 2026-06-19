@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ store_name }}{% endblock %}</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+    <meta name="theme-color" content="#0f0f0f">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>:root{--orange: {{ site_settings.primary_color|default("#D96A1B") }}; --orange2: {{ site_settings.primary_color|default("#D96A1B") }};}</style>
+</head>
+<body>
+    {% include "partials/header.html" %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-wrap">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>{% block content %}{% endblock %}</main>
+
+    {% include "partials/footer.html" %}
+
+    <a class="whatsapp-float" href="https://wa.me/{{ whatsapp_number }}" target="_blank" rel="noopener" aria-label="Pedir pelo WhatsApp">
+        <span>💬</span>
+        <strong>Pedir no WhatsApp</strong>
+    </a>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Clientes | Admin{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div><h1>Clientes e fidelidade</h1><p class="muted">Histórico básico por celular, pontos e nível do cliente.</p></div>
+        <a class="btn secondary" href="/admin">Voltar</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Cliente</th><th>Telefone</th><th>Nível</th><th>Pedidos</th><th>Pontos</th><th>Total gasto</th><th>Último pedido</th></tr></thead>
+            <tbody>
+            {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.name }}</td>
+                    <td>{{ cliente.phone }}</td>
+                    <td><span class="badge loyalty-{{ cliente.level()|lower }}">{{ cliente.level() }}</span></td>
+                    <td>{{ cliente.total_orders }}</td>
+                    <td>{{ cliente.loyalty_points }}</td>
+                    <td>R$ {{ "%.2f"|format(cliente.total_spent) }}</td>
+                    <td>{{ cliente.last_order_at.strftime('%d/%m/%Y %H:%M') if cliente.last_order_at else '-' }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="7">Nenhum cliente registrado ainda.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

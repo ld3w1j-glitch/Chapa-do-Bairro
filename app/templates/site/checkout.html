@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Finalizar Pedido | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="checkout-layout">
+        <div class="panel">
+            <h1>Finalizar pedido</h1>
+            <p class="muted">Preencha seus dados antes de enviar para o WhatsApp.</p>
+
+            <div class="checkout-product">
+                {% if produto.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + produto.image) }}" alt="{{ produto.name }}">
+                {% else %}
+                    <div class="placeholder small">🍔</div>
+                {% endif %}
+
+                <div>
+                    <small>{{ produto.category.name }}</small>
+                    <h2>{{ produto.name }}</h2>
+                    <p>{{ produto.description }}</p>
+                    <strong>{{ produto.price_br() }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <form class="form-card checkout-form" method="post">
+            <h2>Dados do cliente</h2>
+
+            <label>Nome</label>
+            <input name="customer_name" placeholder="Seu nome" required>
+
+            <label>Telefone de contato</label>
+            <div class="phone-input-row">
+                <span class="phone-prefix">+55 (35)</span>
+                <input name="customer_phone" inputmode="numeric" pattern="9[0-9]{8}" minlength="9" maxlength="9" placeholder="999999999" autocomplete="tel" required>
+            </div>
+            <small class="field-help">Digite apenas o celular com 9 dígitos. O sistema adiciona automaticamente +55 (35).</small>
+
+            <label>Quantidade</label>
+            <input type="number" name="quantity" value="1" min="1" required>
+
+            <label>Tipo de pedido</label>
+            <select name="delivery_type" id="delivery_type">
+                <option value="retirada">Retirada no balcão</option>
+                <option value="entrega">Entrega</option>
+            </select>
+
+            <div id="address_box" class="hidden">
+                <label>Endereço completo</label>
+                <input name="address" placeholder="Rua, número, bairro e referência">
+            </div>
+
+            <label>Forma de pagamento</label>
+            <select name="payment_method" id="payment_method" required>
+                <option value="">Selecione</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão de crédito">Cartão de crédito</option>
+                <option value="Cartão de débito">Cartão de débito</option>
+                <option value="Dinheiro">Dinheiro</option>
+            </select>
+
+            <div id="cash_box" class="hidden">
+                <label>Troco para quanto?</label>
+                <input name="cash_change_for" placeholder="Ex: 50,00">
+            </div>
+
+            <label>Observações</label>
+            <textarea name="notes" rows="3" placeholder="Ex: sem cebola, ponto da carne, referência da entrega..."></textarea>
+
+            <button class="btn full" type="submit">Enviar pedido para WhatsApp</button>
+            <a class="link" href="/cardapio">Voltar ao cardápio</a>
+        </form>
+    </div>
+</section>
+{% endblock %}

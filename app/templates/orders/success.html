@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Pedido criado{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <div class="form-card">
+        <h1>Pedido enviado!</h1>
+        <p>Seu pedido número <strong>#{{ order_id }}</strong> foi registrado.</p>
+        <div class="order-progress success-progress">
+            <div class="progress-step active">✓<span>Recebido</span></div>
+            <div class="progress-step active">2<span>Em preparo</span></div>
+            <div class="progress-step">3<span>Saiu</span></div>
+            <div class="progress-step">4<span>Entregue</span></div>
+        </div>
+        <a class="btn full" href="/cardapio">Voltar ao cardápio</a>
+    </div>
+</section>
+{% endblock %}

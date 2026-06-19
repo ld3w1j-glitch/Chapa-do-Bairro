@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Admin | Dashboard{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>Dashboard</h1>
+            <p class="muted">Visão geral da operação.</p>
+        </div>
+        <a class="btn secondary" href="/logout">Sair</a>
+    </div>
+
+    <div class="stats">
+        <div class="stat"><strong>{{ total_products }}</strong><span>Produtos</span></div>
+        <div class="stat"><strong>{{ active_products }}</strong><span>Produtos ativos</span></div>
+        <div class="stat"><strong>{{ orders_today }}</strong><span>Pedidos hoje</span></div>
+        <div class="stat"><strong>{{ pending_orders }}</strong><span>Pedidos em aberto</span></div>
+        <div class="stat"><strong>{{ completed_today }}</strong><span>Finalizados hoje</span></div>
+        <div class="stat"><strong>{{ low_stock }}</strong><span>Itens com estoque baixo</span></div>
+        <div class="stat"><strong>{{ total_customers }}</strong><span>Clientes cadastrados</span></div>
+        <div class="stat"><strong>{{ vip_customers }}</strong><span>Clientes VIP</span></div>
+        <div class="stat"><strong>R$ {{ "%.2f"|format(revenue_today) }}</strong><span>Faturamento hoje</span></div>
+        <div class="stat"><strong>R$ {{ "%.2f"|format(avg_ticket) }}</strong><span>Ticket médio</span></div>
+        <div class="stat"><strong>{{ peak_hour }}</strong><span>Horário de pico</span></div>
+        <div class="stat"><strong>{{ "%.1f"|format(cancel_rate) }}%</strong><span>Cancelamento</span></div>
+    </div>
+
+    <div class="quick-actions">
+        <a class="btn" href="/admin/produtos">Produtos</a>
+        <a class="btn" href="/admin/categorias">Categorias</a>
+        <a class="btn" href="/admin/pedidos">Pedidos</a>
+        <a class="btn" href="/admin/cozinha">Painel da Cozinha</a>
+        <a class="btn" href="/admin/entregadores">Entregadores</a>
+        <a class="btn" href="/admin/pedidos/historico">Histórico</a>
+        <a class="btn" href="/admin/relatorios">Relatórios</a>
+        <a class="btn" href="/admin/campanhas">Campanhas</a>
+        <a class="btn" href="/admin/cupons">Cupons</a>
+        <a class="btn" href="/admin/fretes">Fretes por Bairro</a>
+        <a class="btn" href="/admin/clientes">Clientes</a>
+        <a class="btn" href="/admin/configuracoes">Configurações</a>
+        <a class="btn" href="/admin/estoque">Estoque Inteligente</a>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="panel">
+            <h2>Vendas dos últimos 7 dias</h2>
+            <div class="sales-chart">
+                {% for day in week_sales %}
+                <div class="chart-day">
+                    <div class="chart-bar" style="height: {{ day.height }}%"></div>
+                    <small>{{ day.label }}</small>
+                    <b>R$ {{ "%.0f"|format(day.revenue) }}</b>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="panel">
+            <h2>Mais vendidos</h2>
+            <ol class="best-seller-list">
+                {% for name, qty in best_sellers %}
+                <li><span>{{ name }}</span><strong>{{ qty }} un.</strong></li>
+                {% else %}
+                <li class="muted">Ainda sem vendas suficientes.</li>
+                {% endfor %}
+            </ol>
+        </div>
+        <div class="panel operator-panel">
+            <h2>Operação inteligente</h2>
+            <p>🔔 Mantenha pedidos recebidos sempre visíveis.</p>
+            <p>🍳 Use o Painel da Cozinha em uma tela separada para agilizar preparo.</p>
+            <p>🛵 Acompanhe entregadores e pedidos em rota.</p>
+            <p>📲 Use o botão de WhatsApp no detalhe do pedido para avisar cada status.</p>
+            <p>🎁 Incentive retorno com cupom VOLTE10 e fidelidade por telefone.</p>
+        </div>
+    </div>
+
+    <h2>Últimos pedidos</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>#</th><th>Cliente</th><th>Status</th><th>Total</th><th>Abrir</th></tr>
+            </thead>
+            <tbody>
+                {% for pedido in latest_orders %}
+                <tr>
+                    <td>#{{ pedido.id }}</td>
+                    <td>{{ pedido.customer_name }}</td>
+                    <td><span class="badge status-{{ pedido.status|replace(" ", "-") }}">{{ pedido.status_label() }}</span></td>
+                    <td>{{ pedido.total_br() }}</td>
+                    <td><a href="/admin/pedidos/{{ pedido.id }}">Ver</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5">Nenhum pedido ainda.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

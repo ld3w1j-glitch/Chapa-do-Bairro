@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Login Admin{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <form class="form-card" method="post">
+        <h1>Entrar no painel</h1>
+
+        <label>Usuário</label>
+        <input name="username" required>
+
+        <label>Senha</label>
+        <input type="password" name="password" required>
+
+        <button class="btn full" type="submit">Entrar</button>
+        <p class="muted">Padrão: admin / 123456</p>
+    </form>
+</section>
+{% endblock %}

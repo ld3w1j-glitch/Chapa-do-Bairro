@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Finalizar Pedido | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="checkout-layout">
+        <div class="panel">
+            <h1>Finalizar pedido</h1>
+            <p class="muted">Confira os itens e informe seus dados antes de enviar para o WhatsApp.</p>
+            <div class="order-progress checkout-progress">
+                <div class="progress-step active">1<span>Carrinho</span></div>
+                <div class="progress-step active">2<span>Dados</span></div>
+                <div class="progress-step">3<span>WhatsApp</span></div>
+                <div class="progress-step">4<span>Preparo</span></div>
+            </div>
+
+            <div class="mini-cart">
+                {% for item in items %}
+                <div class="mini-cart-item">
+                    <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                    <strong>{{ money_br(item.subtotal) }}</strong>
+                </div>
+                {% endfor %}
+            </div>
+
+            <p class="muted" id="delivery_fee_preview">Taxa de entrega: R$ 0,00</p>
+            <h2 id="checkout_total" data-base-total="{{ total }}">Total: {{ money_br(total) }}</h2>
+            <a class="link" href="/carrinho">Editar carrinho</a>
+        </div>
+
+        <form class="form-card checkout-form" method="post">
+            <h2>Dados do cliente</h2>
+            <div class="smart-tip">📲 Depois de registrar, o pedido abre no WhatsApp já formatado.</div>
+
+            <label>Nome</label>
+            <input name="customer_name" placeholder="Seu nome" required>
+
+            <label>Telefone de contato</label>
+            <div class="phone-input-row">
+                <span class="phone-prefix">+55 (35)</span>
+                <input name="customer_phone" inputmode="numeric" pattern="9[0-9]{8}" minlength="9" maxlength="9" placeholder="999999999" autocomplete="tel" required>
+            </div>
+            <small class="field-help">Digite apenas o celular com 9 dígitos. O sistema adiciona automaticamente +55 (35).</small>
+
+            <label>Tipo de pedido</label>
+            <select name="delivery_type" id="delivery_type">
+                <option value="retirada">Retirada no balcão</option>
+                <option value="entrega">Entrega</option>
+            </select>
+
+            <div id="address_box" class="hidden">
+                <label>Bairro</label>
+                <select name="delivery_neighborhood" id="delivery_neighborhood">
+                    <option value="">Selecione o bairro</option>
+                    {% for bairro, taxa in delivery_fees.items() %}
+                        <option value="{{ bairro }}" data-fee="{{ taxa }}">{{ bairro }} - {{ money_br(taxa) }}</option>
+                    {% endfor %}
+                </select>
+
+                <label>Endereço completo</label>
+                <input name="address" placeholder="Rua, número, bairro e referência">
+            </div>
+
+
+            <label>Cupom de desconto</label>
+            <div class="coupon-line">
+                <input name="coupon_code" id="coupon_code" placeholder="Ex: VOLTE10" style="text-transform: uppercase;">
+                <small>Use cupons cadastrados no painel administrativo.</small>
+            </div>
+
+            <label>Forma de pagamento</label>
+            <select name="payment_method" id="payment_method" required>
+                <option value="">Selecione</option>
+                <option value="Pix">Pix</option>
+                <option value="Cartão de crédito">Cartão de crédito</option>
+                <option value="Cartão de débito">Cartão de débito</option>
+                <option value="Dinheiro">Dinheiro</option>
+            </select>
+
+            <div id="pix_box" class="pix-box hidden">
+                <strong>Pagamento via Pix</strong>
+                <p>Escaneie o QR Code ou copie o Pix Copia e Cola. Depois de registrar o pedido, envie o comprovante pelo WhatsApp.</p>
+                {% if site_settings.pix_key %}
+                    <div class="pix-qr-wrap">
+                        <img id="pix_qr" alt="QR Code Pix" loading="lazy">
+                    </div>
+                    <label>Pix Copia e Cola</label>
+                    <textarea id="pix_payload" rows="4" readonly></textarea>
+                    <div class="copy-line"><span>Chave Pix:</span><code id="pix_key">{{ site_settings.pix_key }}</code><button type="button" data-copy="#pix_key">Copiar chave</button></div>
+                    <button class="table-button" type="button" data-copy="#pix_payload">Copiar Pix Copia e Cola</button>
+                    <small>Recebedor: {{ site_settings.pix_owner }} • Cidade: {{ site_settings.pix_city|default('MONTES CLAROS') }}</small>
+                {% else %}
+                    <small>Cadastre a chave Pix em Admin &gt; Configurações para liberar QR Code no checkout.</small>
+                {% endif %}
+            </div>
+
+            <div id="cash_box" class="hidden">
+                <label>Troco para quanto?</label>
+                <input name="cash_change_for" placeholder="Ex: 50,00">
+            </div>
+
+            <label>Observações</label>
+            <div class="quick-notes">
+                <button type="button" data-note="Sem cebola">Sem cebola</button>
+                <button type="button" data-note="Carne ao ponto">Carne ao ponto</button>
+                <button type="button" data-note="Caprichar no molho">Caprichar no molho</button>
+            </div>
+            <textarea name="notes" id="notes" rows="3" placeholder="Ex: sem cebola, ponto da carne, referência da entrega..."></textarea>
+
+            <div class="loyalty-mini">⭐ Este pedido pode contar para o programa de fidelidade pelo telefone informado.</div>
+
+            <button class="btn full" type="submit">Registrar e enviar pedido para WhatsApp</button>
+        </form>
+    </div>
+</section>
+<script>
+(function(){
+    const deliveryType = document.getElementById('delivery_type');
+    const paymentMethod = document.getElementById('payment_method');
+    const pixBox = document.getElementById('pix_box');
+    const cashBox = document.getElementById('cash_box');
+    const neighborhood = document.getElementById('delivery_neighborhood');
+    const feePreview = document.getElementById('delivery_fee_preview');
+    const totalEl = document.getElementById('checkout_total');
+    function moneyBR(value){ return value.toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); }
+    function currentTotal(){
+        const base = parseFloat(totalEl.dataset.baseTotal || '0');
+        let fee = 0;
+        if(deliveryType.value === 'entrega' && neighborhood && neighborhood.selectedOptions.length){
+            fee = parseFloat(neighborhood.selectedOptions[0].dataset.fee || '0');
+        }
+        return base + fee;
+    }
+    function updatePix(){
+        const qr = document.getElementById('pix_qr');
+        const payload = document.getElementById('pix_payload');
+        if(!qr || !payload) return;
+        const amount = currentTotal().toFixed(2);
+        qr.src = '/pix/qrcode?amount=' + encodeURIComponent(amount) + '&txid=CHAPA';
+        fetch('/pix/copia-cola?amount=' + encodeURIComponent(amount) + '&txid=CHAPA')
+            .then(r => r.text())
+            .then(text => payload.value = text)
+            .catch(() => payload.value = 'Não foi possível gerar o Pix Copia e Cola.');
+    }
+    function updateDeliveryFee(){
+        let fee = 0;
+        if(deliveryType.value === 'entrega' && neighborhood && neighborhood.selectedOptions.length){
+            fee = parseFloat(neighborhood.selectedOptions[0].dataset.fee || '0');
+        }
+        feePreview.textContent = 'Taxa de entrega: ' + moneyBR(fee);
+        totalEl.textContent = 'Total: ' + moneyBR(currentTotal());
+        updatePix();
+    }
+    if(deliveryType) deliveryType.addEventListener('change', updateDeliveryFee);
+    function updatePaymentBoxes(){
+        if(!paymentMethod) return;
+        if(pixBox) pixBox.classList.toggle('hidden', paymentMethod.value !== 'Pix');
+        if(paymentMethod.value === 'Pix') updatePix();
+        if(cashBox) cashBox.classList.toggle('hidden', paymentMethod.value !== 'Dinheiro');
+    }
+    if(paymentMethod) paymentMethod.addEventListener('change', updatePaymentBoxes);
+    document.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
+        const el = document.querySelector(btn.dataset.copy);
+        if(el && navigator.clipboard){ navigator.clipboard.writeText(el.textContent.trim()); btn.textContent = 'Copiado'; }
+    }));
+    updatePaymentBoxes();
+    if(neighborhood) neighborhood.addEventListener('change', updateDeliveryFee);
+    updateDeliveryFee();
+})();
+</script>
+{% endblock %}

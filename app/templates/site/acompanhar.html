@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Acompanhar Pedido | {{ store_name }}{% endblock %}
+{% block content %}
+<section class="container">
+  <div class="panel customer-track">
+    <span class="eyebrow">Área do cliente</span>
+    <h1>Acompanhe seus pedidos</h1>
+    <p class="muted">Digite apenas o celular. O sistema procura automaticamente no padrão +55 (35).</p>
+    <form method="post" class="track-form">
+      <div class="phone-input-row">
+        <span class="phone-prefix">+55 (35)</span>
+        <input name="customer_phone" inputmode="numeric" pattern="9[0-9]{8}" minlength="9" maxlength="9" placeholder="999999999" value="{{ telefone }}" required>
+      </div>
+      <button class="btn" type="submit">Buscar pedidos</button>
+    </form>
+  </div>
+
+  {% if pedidos %}
+  <div class="tracking-grid">
+    {% for pedido in pedidos %}
+    <article class="panel order-track-card">
+      <div class="order-headline">
+        <div>
+          <strong>Pedido #{{ pedido.id }}</strong>
+          <small>{{ pedido.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+        </div>
+        <span class="status-pill status-{{ pedido.status|replace(' ', '-') }}">{{ pedido.status_label() }}</span>
+      </div>
+      <div class="order-progress">
+        <div class="progress-step {{ 'active' if pedido.status in ['recebido','em preparo','saiu para entrega','finalizado'] else '' }}">1<span>Recebido</span></div>
+        <div class="progress-step {{ 'active' if pedido.status in ['em preparo','saiu para entrega','finalizado'] else '' }}">2<span>Preparo</span></div>
+        <div class="progress-step {{ 'active' if pedido.status in ['saiu para entrega','finalizado'] else '' }}">3<span>Entrega</span></div>
+        <div class="progress-step {{ 'active' if pedido.status == 'finalizado' else '' }}">4<span>Finalizado</span></div>
+      </div>
+      <ul class="clean-list">
+        {% for item in pedido.items %}
+          <li>{{ item.quantity }}x {{ item.product.name }} <strong>R$ {{ '%.2f'|format(item.subtotal) }}</strong></li>
+        {% endfor %}
+      </ul>
+      <div class="order-total-line">Total <strong>{{ pedido.total_br() }}</strong></div>
+      <a class="btn outline" href="/carrinho">Fazer novo pedido</a>
+    </article>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

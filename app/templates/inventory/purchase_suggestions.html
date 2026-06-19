@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Compras Sugeridas | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>Compras sugeridas</h1>
+            <p class="muted">Lista baseada no estoque mínimo de cada insumo.</p>
+        </div>
+        <a class="btn secondary" href="/admin/estoque">Voltar</a>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Insumo</th>
+                    <th>Atual</th>
+                    <th>Mínimo</th>
+                    <th>Sugestão de compra</th>
+                    <th>Fornecedor</th>
+                    <th>Custo estimado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in suggestions %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.stock_label() }}</td>
+                    <td>{{ item.minimum_label() }}</td>
+                    <td>{{ item.suggested_purchase()|round(2) }} {{ item.unit }}</td>
+                    <td>{{ item.supplier.name if item.supplier else "-" }}</td>
+                    <td>R$ {{ "%.2f"|format(item.suggested_purchase() * item.cost_per_unit) }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6">Nenhuma compra sugerida no momento.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

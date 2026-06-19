@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Insumos | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <h1>Insumos e Matéria-prima</h1>
+        <div>
+            <a class="btn secondary" href="/admin/estoque">Voltar</a>
+            <a class="btn" href="/admin/estoque/insumos/novo">Novo insumo</a>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Insumo</th>
+                    <th>Estoque atual</th>
+                    <th>Estoque mínimo</th>
+                    <th>Custo</th>
+                    <th>Perda</th>
+                    <th>Fornecedor</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for insumo in insumos %}
+                <tr class="{{ 'low-stock-row' if insumo.is_low_stock() else '' }}">
+                    <td>{{ insumo.name }}</td>
+                    <td>{{ insumo.stock_label() }}</td>
+                    <td>{{ insumo.minimum_label() }}</td>
+                    <td>{{ insumo.cost_br() }} / {{ insumo.unit }}</td>
+                    <td>{{ insumo.waste_percent }}%</td>
+                    <td>{{ insumo.supplier.name if insumo.supplier else "-" }}</td>
+                    <td>
+                        {% if insumo.is_low_stock() %}
+                            <span class="badge danger">Baixo</span>
+                        {% else %}
+                            <span class="badge">OK</span>
+                        {% endif %}
+                    </td>
+                    <td><a href="/admin/estoque/insumos/{{ insumo.id }}/editar">Editar</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8">Nenhum insumo cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

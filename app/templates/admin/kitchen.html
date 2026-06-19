@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Painel da Cozinha{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>🍳 Painel da Cozinha</h1>
+            <p class="muted">Tela rápida para acompanhar preparo, entrega e prioridade dos pedidos.</p>
+        </div>
+        <div class="quick-actions">
+            <a class="btn secondary" href="/admin">Dashboard</a>
+            <a class="btn" href="/admin/pedidos">Pedidos</a>
+        </div>
+    </div>
+
+    <div class="kitchen-board">
+        {% for status, titulo in colunas %}
+        <div class="kitchen-column">
+            <h2>{{ titulo }}</h2>
+            {% for pedido in pedidos if pedido.status == status %}
+            <article class="kitchen-ticket status-{{ pedido.status|replace(' ', '-') }}">
+                <div class="ticket-head">
+                    <strong>#{{ pedido.id }}</strong>
+                    <span>{{ pedido.created_at.strftime('%H:%M') }}</span>
+                </div>
+                <h3>{{ pedido.customer_name }}</h3>
+                <ul>
+                    {% for item in pedido.items %}
+                    <li>{{ item.quantity }}x {{ item.product.name }}</li>
+                    {% endfor %}
+                </ul>
+                {% if pedido.notes %}<p class="ticket-note">Obs: {{ pedido.notes }}</p>{% endif %}
+                <p class="muted">{{ pedido.delivery_type|capitalize }}{% if pedido.delivery_neighborhood %} • {{ pedido.delivery_neighborhood }}{% endif %}</p>
+                <strong class="ticket-total">{{ pedido.total_br() }}</strong>
+                <div class="ticket-actions">
+                    <a href="/admin/pedidos/{{ pedido.id }}">Abrir</a>
+                    <a href="/admin/pedidos/{{ pedido.id }}/whatsapp/status?status={{ pedido.status }}" target="_blank">WhatsApp</a>
+                </div>
+            </article>
+            {% else %}
+            <p class="muted empty-column">Nenhum pedido aqui.</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

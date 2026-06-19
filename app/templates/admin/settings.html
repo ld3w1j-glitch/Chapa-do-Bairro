@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Admin | Configurações{% endblock %}
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div><h1>⚙️ Personalização do Site</h1><p class="muted">Altere informações comerciais sem mexer no código.</p></div>
+        <a class="btn secondary" href="/admin">Voltar</a>
+    </div>
+    <form class="form-card settings-form" method="post">
+        <label>Nome da marca<input name="store_name" value="{{ settings.store_name }}" required></label>
+        <label>Slogan principal<input name="slogan" value="{{ settings.slogan }}" required></label>
+        <label>Cor principal<input type="color" name="primary_color" value="{{ settings.primary_color }}"></label>
+        <label>Tempo médio de entrega<input name="delivery_time" value="{{ settings.delivery_time }}"></label>
+        <label>Mensagem de funcionamento<textarea name="open_message" rows="3">{{ settings.open_message }}</textarea></label>
+        <label>Chave Pix</label>
+        <input name="pix_key" value="{{ settings.pix_key }}" placeholder="CPF, e-mail, telefone ou chave aleatória">
+        <small class="field-help">A chave aparece no checkout quando o cliente escolhe Pix.</small>
+
+        <label>Nome do recebedor Pix</label>
+        <input name="pix_owner" value="{{ settings.pix_owner }}" placeholder="Nome da empresa ou responsável">
+
+        <label>Cidade do Pix</label>
+        <input name="pix_city" value="{{ settings.pix_city|default('MONTES CLAROS') }}" placeholder="MONTES CLAROS">
+        <button class="btn" type="submit">Salvar configurações</button>
+    </form>
+</section>
+{% endblock %}

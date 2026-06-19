@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Relatório para Impressão | {{ store_name }}{% endblock %}
+{% block content %}
+<section class="container print-report">
+  <div class="panel report-header">
+    <div>
+      <span class="eyebrow">Relatório mensal</span>
+      <h1>{{ store_name }}</h1>
+      <p class="muted">Gerado em {{ today.strftime('%d/%m/%Y') }}</p>
+    </div>
+    <button class="btn" onclick="window.print()">Imprimir / Salvar PDF</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><span>Faturamento do mês</span><strong>R$ {{ '%.2f'|format(revenue_month) }}</strong></div>
+    <div class="stat-card"><span>Pedidos finalizados</span><strong>{{ orders|length }}</strong></div>
+    <div class="stat-card"><span>Ticket médio</span><strong>R$ {{ '%.2f'|format(avg_ticket) }}</strong></div>
+  </div>
+
+  <div class="panel">
+    <h2>Mais vendidos no mês</h2>
+    <table class="table">
+      <thead><tr><th>Produto</th><th>Quantidade</th></tr></thead>
+      <tbody>{% for nome, qty in best_sellers %}<tr><td>{{ nome }}</td><td>{{ qty }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Pedidos do mês</h2>
+    <table class="table">
+      <thead><tr><th>#</th><th>Cliente</th><th>Status</th><th>Pagamento</th><th>Total</th><th>Data</th></tr></thead>
+      <tbody>
+      {% for p in orders %}
+        <tr><td>{{ p.id }}</td><td>{{ p.customer_name }}</td><td>{{ p.status_label() }}</td><td>{{ p.payment_method or '-' }}</td><td>{{ p.total_br() }}</td><td>{{ p.created_at.strftime('%d/%m/%Y') }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

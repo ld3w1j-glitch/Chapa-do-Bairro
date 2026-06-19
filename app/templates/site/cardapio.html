@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Cardápio | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="section-head">
+        <div>
+            <h1>Cardápio</h1>
+            <p class="muted">Escolha seu lanche e peça direto pelo WhatsApp ou pelo sistema interno.</p>
+        </div>
+        <a href="/carrinho" class="btn">Ver carrinho</a>
+    </div>
+
+    <div class="menu-tools">
+        <input id="menu_search" type="search" placeholder="Buscar por hambúrguer, bacon, combo...">
+        <span>🔥 Mais vendidos</span>
+        <span>🍟 Combos</span>
+        <span>🛵 Entrega rápida</span>
+    </div>
+
+    {% for categoria in categorias %}
+        {% set produtos = categoria.products | selectattr("active") | list %}
+        {% if produtos %}
+            <h2 class="category-title">{{ categoria.name }}</h2>
+            <div class="grid">
+                {% for produto in produtos %}
+                <article class="card product-card menu-product" data-name="{{ produto.name }} {{ produto.description }} {{ categoria.name }}">
+                    {% if produto.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + produto.image) }}" alt="{{ produto.name }}">
+                    {% else %}
+                        <div class="placeholder">🍔</div>
+                    {% endif %}
+                    <div class="product-title-line"><h3>{{ produto.name }}</h3><span class="mini-badge">🔥 chapa</span></div>
+                    <p>{{ produto.description }}</p>
+                    <div class="product-meta"><strong>{{ produto.price_br() }}</strong><span>⏱️ 20-35 min</span></div>
+                    <div class="combo-hint">🍟 Combo inteligente: batata + refri para aumentar a experiência.</div>
+                    <form method="post" action="/carrinho/adicionar/{{ produto.id }}" class="add-cart-form">
+                    <div class="qty-line">
+                        <input type="number" name="quantity" value="1" min="1">
+                        <button class="btn full" type="submit">Adicionar</button>
+                    </div>
+                </form>
+                </article>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Admin | Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <h1>Pedido #{{ pedido.id }}</h1>
+        <div class="hero-actions no-print"><a class="btn secondary" href="/admin/pedidos">Voltar</a><a class="btn" href="/admin/pedidos/{{ pedido.id }}/comanda" target="_blank">Imprimir comanda</a><a class="btn secondary" href="/admin/pedidos/{{ pedido.id }}/whatsapp" target="_blank">Enviar WhatsApp</a></div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="panel">
+            <h2>Cliente</h2>
+            <p><strong>Nome:</strong> {{ pedido.customer_name }}</p>
+            <p><strong>Telefone:</strong> {{ pedido.customer_phone }}</p>
+            <p class="muted">Padrão WhatsApp: 55 + DDD + celular. Ex: 5535999999999</p>
+            <p><strong>Tipo:</strong> {{ pedido.delivery_type }}</p>
+            <p><strong>Bairro:</strong> {{ pedido.delivery_neighborhood or "-" }}</p>
+            <p><strong>Endereço:</strong> {{ pedido.address or "-" }}</p>
+            <p><strong>Taxa de entrega:</strong> R$ {{ "%.2f"|format(pedido.delivery_fee or 0) }}</p>
+            <p><strong>Pagamento:</strong> {{ pedido.payment_method or "-" }}</p>
+            <p><strong>Troco:</strong> {{ pedido.cash_change_for or "-" }}</p>
+            <p><strong>Obs:</strong> {{ pedido.notes or "-" }}</p>
+        </div>
+
+        <div class="panel">
+            <h2>Status atual: <span class="badge status-{{ pedido.status|replace(" ", "-") }}">{{ pedido.status_label() }}</span></h2>
+            <form method="post" action="/admin/pedidos/{{ pedido.id }}/status" onsubmit="return confirmarCancelamento(this)">
+                <select name="status" id="status_select">
+                    {% for status in ["recebido", "em preparo", "saiu para entrega", "finalizado", "cancelado"] %}
+                        <option value="{{ status }}" {% if pedido.status == status %}selected{% endif %}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn full" type="submit">Atualizar status</button>
+            </form>
+
+            <div class="status-whatsapp-box no-print">
+                <h3>Enviar status ao cliente</h3>
+                <p class="muted">Abre o WhatsApp direto no número cadastrado.</p>
+                {% for status in ["recebido", "em preparo", "saiu para entrega", "finalizado", "cancelado"] %}
+                    <a class="btn secondary full" target="_blank" href="/admin/pedidos/{{ pedido.id }}/whatsapp/status?status={{ status }}">
+                        Enviar: {{ pedido.status_label(status) }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <h2>Itens</h2>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Produto</th><th>Qtd</th><th>Unitário</th><th>Subtotal</th></tr></thead>
+            <tbody>
+                {% for item in pedido.items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>R$ {{ "%.2f"|format(item.unit_price) }}</td>
+                    <td>R$ {{ "%.2f"|format(item.subtotal) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Total: {{ pedido.total_br() }}</h2>
+</section>
+<script>
+function confirmarCancelamento(form){
+    const status = form.querySelector('[name="status"]').value;
+    if(status === 'cancelado'){
+        return confirm('Tem certeza que deseja cancelar e excluir este pedido? O estoque será devolvido.');
+    }
+    return true;
+}
+</script>
+
+{% endblock %}

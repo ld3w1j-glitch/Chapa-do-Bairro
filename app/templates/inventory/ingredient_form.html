@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Insumo | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <form class="form-card wide" method="post">
+        <h1>{{ "Editar insumo" if insumo else "Novo insumo" }}</h1>
+
+        <label>Nome do insumo</label>
+        <input name="name" value="{{ insumo.name if insumo else '' }}" placeholder="Ex: Carne smash 120g" required>
+
+        <label>Unidade de medida</label>
+        <select name="unit">
+            {% for unit in ["un", "g", "kg", "ml", "L", "fatia", "pacote"] %}
+                <option value="{{ unit }}" {% if insumo and insumo.unit == unit %}selected{% endif %}>{{ unit }}</option>
+            {% endfor %}
+        </select>
+
+        <div class="form-grid">
+            <div>
+                <label>Estoque atual</label>
+                <input name="current_stock" value="{{ insumo.current_stock if insumo else '0' }}" required>
+            </div>
+            <div>
+                <label>Estoque mínimo</label>
+                <input name="minimum_stock" value="{{ insumo.minimum_stock if insumo else '0' }}" required>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div>
+                <label>Custo por unidade</label>
+                <input name="cost_per_unit" value="{{ insumo.cost_per_unit if insumo else '0' }}" required>
+            </div>
+            <div>
+                <label>Perda/desperdício estimado (%)</label>
+                <input name="waste_percent" value="{{ insumo.waste_percent if insumo else '0' }}">
+            </div>
+        </div>
+
+        <label>Fornecedor</label>
+        <select name="supplier_id">
+            <option value="">Sem fornecedor</option>
+            {% for fornecedor in fornecedores %}
+                <option value="{{ fornecedor.id }}" {% if insumo and insumo.supplier_id == fornecedor.id %}selected{% endif %}>
+                    {{ fornecedor.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label class="check">
+            <input type="checkbox" name="active" {% if not insumo or insumo.active %}checked{% endif %}>
+            Ativo
+        </label>
+
+        <button class="btn full" type="submit">Salvar</button>
+        <a class="link" href="/admin/estoque/insumos">Voltar</a>
+    </form>
+</section>
+{% endblock %}

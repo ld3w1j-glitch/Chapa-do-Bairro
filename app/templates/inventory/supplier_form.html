@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Fornecedor | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="form-page">
+    <form class="form-card wide" method="post">
+        <h1>{{ "Editar fornecedor" if fornecedor else "Novo fornecedor" }}</h1>
+
+        <label>Nome</label>
+        <input name="name" value="{{ fornecedor.name if fornecedor else '' }}" required>
+
+        <label>Telefone</label>
+        <input name="phone" value="{{ fornecedor.phone if fornecedor else '' }}">
+
+        <label>Observações</label>
+        <textarea name="notes" rows="4">{{ fornecedor.notes if fornecedor else '' }}</textarea>
+
+        <label class="check">
+            <input type="checkbox" name="active" {% if not fornecedor or fornecedor.active %}checked{% endif %}>
+            Ativo
+        </label>
+
+        <button class="btn full" type="submit">Salvar</button>
+        <a class="link" href="/admin/estoque/fornecedores">Voltar</a>
+    </form>
+</section>
+{% endblock %}

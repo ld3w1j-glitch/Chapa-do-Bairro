@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Estoque Inteligente | {{ store_name }}{% endblock %}
+
+{% block content %}
+<section class="container">
+    <div class="admin-head">
+        <div>
+            <h1>Estoque Inteligente</h1>
+            <p class="muted">Controle insumos, custos, produção possível e compras sugeridas.</p>
+        </div>
+        <a class="btn secondary" href="/admin">Voltar</a>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <strong>{{ ingredients|length }}</strong>
+            <span>Insumos cadastrados</span>
+        </div>
+        <div class="stat">
+            <strong>{{ low_stock|length }}</strong>
+            <span>Insumos em alerta</span>
+        </div>
+        <div class="stat">
+            <strong>R$ {{ "%.2f"|format(total_stock_value) }}</strong>
+            <span>Valor aproximado em estoque</span>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <a class="btn" href="/admin/estoque/insumos">Insumos</a>
+        <a class="btn" href="/admin/estoque/fornecedores">Fornecedores</a>
+        <a class="btn" href="/admin/estoque/compras-sugeridas">Compras sugeridas</a>
+        <a class="btn" href="/admin/estoque/previsao-lucro">Previsão de lucro</a>
+    </div>
+
+    <h2>Produção possível por produto</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Custo de produção</th>
+                    <th>Preço venda</th>
+                    <th>Lucro estimado</th>
+                    <th>Produção possível</th>
+                    <th>Ficha técnica</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in products %}
+                <tr>
+                    <td>{{ produto.name }}</td>
+                    <td>{{ produto.production_cost_br() }}</td>
+                    <td>{{ produto.price_br() }}</td>
+                    <td>{{ produto.estimated_profit_br() }}</td>
+                    <td>{{ produto.max_possible_production() }} un.</td>
+                    <td><a href="/admin/estoque/ficha-tecnica/{{ produto.id }}">Editar</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6">Nenhum produto cadastrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

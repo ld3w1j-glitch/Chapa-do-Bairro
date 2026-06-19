@@ -1,0 +1,12 @@
+{
+  "name": "Chapa do Bairro",
+  "short_name": "Chapa",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#ff6a00",
+  "icons": [
+    {"src": "/static/img/logo_nav.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/static/img/logo_nav.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
